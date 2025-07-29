@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tambahkan kode ini di bagian bawah file */
+body {
+  /* Ganti 'my-wallpaper.jpg' dengan nama file wallpaper Anda */
+  background-image: url('/background-main.png');
+  background-size: cover; /* Memastikan gambar menutupi seluruh area */
+  background-position: center; /* Memusatkan gambar */
+  background-repeat: no-repeat; /* Mencegah gambar berulang */
+  background-attachment: fixed; /* Membuat gambar tetap di tempat saat scroll */
+}
+
+/* Anda mungkin juga ingin mengatur warna latar belakang fallback */
+html {
+  background-color: #eccb8d; /* Warna solid jika gambar tidak dimuat */
+}
+
+/* Jika Anda ingin konten Anda tetap terlihat di atas gambar latar belakang,
+   pastikan elemen utama seperti <main> atau <div> yang membungkus konten
+   memiliki latar belakang putih atau transparan */
+.bg-gray-100 { /* Kelas yang digunakan di page.tsx dan login/upload */
+  background-color: rgba(243, 244, 246, 0.5); /* Contoh: tambahkan transparansi */
+}
+
+/* Atau jika Anda ingin latar belakang gambar terlihat di seluruh area konten,
+   Anda bisa menghapus atau mengubah kelas bg-gray-100 dari page.tsx dan komponen form */
+
+input[type="email"].input-text-roboto, input[type="password"].input-text-roboto {
+  font-family: var(--font-roboto);
+}
+
+input[type="file"]::file-selector-button {
+  font-family: var(--font-roboto);
+}
