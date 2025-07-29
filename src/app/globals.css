@@ -32,7 +32,7 @@ body {
 /* Tambahkan kode ini di bagian bawah file */
 body {
   /* Ganti 'my-wallpaper.jpg' dengan nama file wallpaper Anda */
-  background-image: url('/background-main.png');
+  background-image: url('/wallpaper-ryo.png');
   background-size: cover; /* Memastikan gambar menutupi seluruh area */
   background-position: center; /* Memusatkan gambar */
   background-repeat: no-repeat; /* Mencegah gambar berulang */
