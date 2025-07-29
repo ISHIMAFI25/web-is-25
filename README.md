@@ -1,6 +1,7 @@
 # web-is-25
 Sejauh ini baru Frotn-end login page & upload page (untuk upload tugas).
 buat masuk ke login page: http://localhost:3000/login
+ini tambahan oleh zidan--
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
