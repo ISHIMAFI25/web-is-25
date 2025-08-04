@@ -1,111 +1,258 @@
 "use client";
 
-import Image from "next/image";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { UserRoundCheck } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="min-h-screen relative">
       {/* Sidebar Component */}
       <Sidebar />
-      
-      {/* Main Content */}
-      <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      {/* Main Content */}
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        {/* Judul Web */}
+        <h1 className="text-6xl font-extrabold mb-8 drop-shadow-lg" style={{ color: "#603017" }}>
+          IS 2025
+        </h1>
+
+        {/* Kolom Informasi */}
+        <section className="w-full max-w-2xl">
+        <Card 
+          className="relative border-4 shadow-2xl"
+          style={{ 
+            backgroundColor: "#f4e4bc",
+            backgroundImage: `
+              radial-gradient(circle at 25% 25%, rgba(101, 67, 33, 0.15) 3px, transparent 3px),
+              radial-gradient(circle at 75% 75%, rgba(101, 67, 33, 0.1) 2px, transparent 2px),
+              radial-gradient(circle at 60% 40%, rgba(101, 67, 33, 0.08) 4px, transparent 4px),
+              radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.12) 2px, transparent 2px),
+              radial-gradient(circle at 90% 20%, rgba(160, 82, 45, 0.1) 3px, transparent 3px),
+              linear-gradient(45deg, rgba(139, 69, 19, 0.03) 25%, transparent 25%),
+              linear-gradient(-45deg, rgba(139, 69, 19, 0.03) 25%, transparent 25%),
+              linear-gradient(0deg, rgba(101, 67, 33, 0.02) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px, 30px 30px, 50px 50px, 35px 35px, 45px 45px, 60px 60px, 60px 60px, 80px 80px",
+            borderStyle: "solid",
+            borderColor: "#8B4513",
+            borderImage: "linear-gradient(45deg, #8B4513, #654321, #A0522D, #8B4513) 1",
+            boxShadow: `
+              0 0 0 2px #654321,
+              0 0 0 4px #8B4513,
+              inset 0 0 20px rgba(139, 69, 19, 0.3),
+              inset 0 0 40px rgba(101, 67, 33, 0.2),
+              0 10px 30px rgba(0, 0, 0, 0.4)
+            `
+          }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {/* Gulungan Atas */}
+          <div className="absolute -top-4 left-0 right-0 h-8 flex justify-center z-20">
+            <div 
+              className="w-full h-8 rounded-t-full shadow-lg relative"
+              style={{
+                background: "linear-gradient(180deg, #8B4513 0%, #A0522D 50%, #8B4513 100%)",
+                boxShadow: "0 -2px 10px rgba(0,0,0,0.3), inset 0 2px 4px rgba(160,82,45,0.5)"
+              }}
+            >
+              {/* Tekstur kayu gulungan atas */}
+              <div 
+                className="w-full h-full rounded-t-full opacity-30"
+                style={{
+                  backgroundImage: `
+                    repeating-linear-gradient(90deg, 
+                      rgba(101,67,33,0.3) 0px, 
+                      rgba(101,67,33,0.3) 2px, 
+                      transparent 2px, 
+                      transparent 4px
+                    )
+                  `
+                }}
+              ></div>
+              
+              {/* Bulatan ujung kiri gulungan atas */}
+              <div 
+                className="absolute -left-4 top-1/2 w-8 h-8 rounded-full shadow-lg transform -translate-y-1/2"
+                style={{
+                  background: "radial-gradient(circle at 30% 30%, #A0522D, #8B4513)",
+                  boxShadow: "-2px 0 8px rgba(0,0,0,0.4), inset 2px 2px 4px rgba(160,82,45,0.3)"
+                }}
+              ></div>
+              
+              {/* Bulatan ujung kanan gulungan atas */}
+              <div 
+                className="absolute -right-4 top-1/2 w-8 h-8 rounded-full shadow-lg transform -translate-y-1/2"
+                style={{
+                  background: "radial-gradient(circle at 30% 30%, #A0522D, #8B4513)",
+                  boxShadow: "2px 0 8px rgba(0,0,0,0.4), inset -2px 2px 4px rgba(160,82,45,0.3)"
+                }}
+              ></div>
+              
+              {/* Tali pengikat gulungan atas */}
+              <div className="absolute top-1/2 left-1/4 w-2 h-6 bg-amber-900 rounded-full transform -translate-y-1/2 opacity-60"></div>
+              <div className="absolute top-1/2 right-1/4 w-2 h-6 bg-amber-900 rounded-full transform -translate-y-1/2 opacity-60"></div>
+            </div>
+          </div>
+
+          {/* Gulungan Bawah */}
+          <div className="absolute -bottom-4 left-0 right-0 h-8 flex justify-center z-20">
+            <div 
+              className="w-full h-8 rounded-b-full shadow-lg relative"
+              style={{
+                background: "linear-gradient(0deg, #8B4513 0%, #A0522D 50%, #8B4513 100%)",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.3), inset 0 -2px 4px rgba(160,82,45,0.5)"
+              }}
+            >
+              {/* Tekstur kayu gulungan bawah */}
+              <div 
+                className="w-full h-full rounded-b-full opacity-30"
+                style={{
+                  backgroundImage: `
+                    repeating-linear-gradient(90deg, 
+                      rgba(101,67,33,0.3) 0px, 
+                      rgba(101,67,33,0.3) 2px, 
+                      transparent 2px, 
+                      transparent 4px
+                    )
+                  `
+                }}
+              ></div>
+              
+              {/* Bulatan ujung kiri gulungan bawah */}
+              <div 
+                className="absolute -left-4 top-1/2 w-8 h-8 rounded-full shadow-lg transform -translate-y-1/2"
+                style={{
+                  background: "radial-gradient(circle at 30% 30%, #A0522D, #8B4513)",
+                  boxShadow: "-2px 0 8px rgba(0,0,0,0.4), inset 2px -2px 4px rgba(160,82,45,0.3)"
+                }}
+              ></div>
+              
+              {/* Bulatan ujung kanan gulungan bawah */}
+              <div 
+                className="absolute -right-4 top-1/2 w-8 h-8 rounded-full shadow-lg transform -translate-y-1/2"
+                style={{
+                  background: "radial-gradient(circle at 30% 30%, #A0522D, #8B4513)",
+                  boxShadow: "2px 0 8px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(160,82,45,0.3)"
+                }}
+              ></div>
+              
+              {/* Tali pengikat gulungan bawah */}
+              <div className="absolute top-1/2 left-1/4 w-2 h-6 bg-amber-900 rounded-full transform -translate-y-1/2 opacity-60"></div>
+              <div className="absolute top-1/2 right-1/4 w-2 h-6 bg-amber-900 rounded-full transform -translate-y-1/2 opacity-60"></div>
+            </div>
+          </div>
+          <CardHeader className="relative">
+            {/* Decorative worn corners */}
+            <div className="absolute top-1 left-1 w-6 h-6 border-l-3 border-t-3 border-amber-800 opacity-70"></div>
+            <div className="absolute top-1 right-1 w-6 h-6 border-r-3 border-t-3 border-amber-800 opacity-70"></div>
+            <div className="absolute bottom-1 left-1 w-6 h-6 border-l-3 border-b-3 border-amber-800 opacity-70"></div>
+            <div className="absolute bottom-1 right-1 w-6 h-6 border-r-3 border-b-3 border-amber-800 opacity-70"></div>
+            
+            {/* Age spots and stains */}
+            <div className="absolute top-3 left-8 w-3 h-3 rounded-full bg-amber-900 opacity-20"></div>
+            <div className="absolute top-12 right-12 w-2 h-2 rounded-full bg-amber-800 opacity-25"></div>
+            <div className="absolute bottom-8 left-20 w-4 h-2 rounded-full bg-amber-900 opacity-15"></div>
+            <div className="absolute top-8 right-6 w-2 h-4 rounded-full bg-amber-800 opacity-20"></div>
+            
+            {/* Torn edge effects */}
+            <div className="absolute top-0 left-16 w-8 h-1 bg-amber-900 opacity-30 transform -skew-x-12"></div>
+            <div className="absolute bottom-0 right-20 w-6 h-1 bg-amber-800 opacity-25 transform skew-x-6"></div>
+            
+            <CardTitle className="text-center text-3xl font-bold mb-4 relative z-10" style={{ 
+              color: "#603017",
+              textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+              fontFamily: "serif"
+            }}>
+              Day ke-3
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-left space-y-6 relative">
+            {/* Heavy aged paper effect with multiple layers */}
+            <div className="absolute inset-0 opacity-15 pointer-events-none"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.4) 2px, transparent 2px),
+                  radial-gradient(circle at 80% 20%, rgba(101, 67, 33, 0.5) 3px, transparent 3px),
+                  radial-gradient(circle at 40% 40%, rgba(160, 82, 45, 0.3) 2px, transparent 2px),
+                  radial-gradient(circle at 70% 70%, rgba(139, 69, 19, 0.6) 1px, transparent 1px),
+                  radial-gradient(circle at 10% 30%, rgba(101, 67, 33, 0.4) 2px, transparent 2px)
+                `,
+                backgroundSize: "60px 60px, 80px 80px, 40px 40px, 100px 100px, 70px 70px"
+              }}
+            ></div>
+            
+            {/* Water stains and age marks */}
+            <div className="absolute top-4 right-8 w-12 h-8 rounded-full bg-amber-900 opacity-10 blur-sm"></div>
+            <div className="absolute bottom-12 left-6 w-16 h-6 rounded-full bg-amber-800 opacity-8 blur-sm"></div>
+            <div className="absolute top-16 left-12 w-8 h-12 rounded-full bg-amber-900 opacity-12 blur-md"></div>
+            
+            {/* Crease lines */}
+            <div className="absolute top-0 left-1/3 w-px h-full bg-amber-800 opacity-20"></div>
+            <div className="absolute top-1/2 left-0 w-full h-px bg-amber-900 opacity-15"></div>
+            
+            {/* Informasi */}
+            <div className="relative z-10">
+              <div className="space-y-2" style={{ 
+                color: "#603017",
+                fontFamily: "serif",
+                textShadow: "0.5px 0.5px 1px rgba(0,0,0,0.2)",
+                fontSize: "18px"
+              }}>
+                <p><strong>Materi:</strong> Algoritma dan Pemrograman Dasar</p>
+                <p><strong>Waktu:</strong> 08.00 - 15.00 WIB</p>
+                <p><strong>Ruangan:</strong> Lab Komputer 2</p>
+              </div>
+            </div>
+
+            {/* Spek */}
+            <div className="relative z-10">
+              <h3 className="text-lg font-semibold mb-3 text-left" style={{ 
+                color: "#603017",
+                fontFamily: "serif",
+                textShadow: "0.5px 0.5px 1px rgba(0,0,0,0.2)",
+                fontSize: "18px"
+              }}>Spek:</h3>
+              <ul className="list-disc pl-5 space-y-2" style={{ 
+                color: "#603017",
+                fontFamily: "serif",
+                textShadow: "0.5px 0.5px 1px rgba(0,0,0,0.2)",
+                fontSize: "18px"
+              }}>
+                <li>Laptop/Notebook</li>
+                <li>Charger Laptop</li>
+                <li>Mouse (Opsional)</li>
+                <li>Buku Catatan dan Alat Tulis</li>
+                <li>Botol Minum</li>
+              </ul>
+            </div>
+
+            {/* Tombol Absen */}
+            <div className="flex justify-center pt-4 relative z-10">
+              <Link href="/absensi">
+                <button 
+                  className="px-6 py-3 rounded-md hover:opacity-90 transition font-medium flex items-center gap-2 shadow-lg text-white border-2 border-amber-800 transform hover:scale-105"
+                  style={{ 
+                    backgroundColor: "#603017",
+                    fontFamily: "serif",
+                    textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
+                  }}
+                >
+                  <UserRoundCheck size={20} color="white" />
+                  Absen Sekarang
+                </button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
       </div>
     </div>
   );

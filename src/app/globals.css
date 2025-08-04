@@ -66,7 +66,7 @@ html {
    pastikan elemen utama seperti <main> atau <div> yang membungkus konten
    memiliki latar belakang putih atau transparan */
 .bg-gray-100 { /* Kelas yang digunakan di page.tsx dan login/upload */
-  background-color: rgba(243, 244, 246, 0.5); /* Contoh: tambahkan transparansi */
+
 }
 
 /* Atau jika Anda ingin latar belakang gambar terlihat di seluruh area konten,

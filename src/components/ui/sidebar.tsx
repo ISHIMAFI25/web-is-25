@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogIn } from "lucide-react";
+import { AlignJustify, X, Home, Upload, LogIn, UserRoundCheck } from "lucide-react";
 import { useState } from "react";
 
 export default function Sidebar() {
@@ -27,14 +27,6 @@ export default function Sidebar() {
         )}
       </button>
 
-      {/* Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
-          onClick={toggleSidebar}
-        />
-      )}
-
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-45 transform transition-transform duration-300 ease-in-out ${
@@ -55,13 +47,13 @@ export default function Sidebar() {
           <ul className="space-y-3">
             <li>
               <Link
-                href="/HomePage"
+                href="/"
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
                 onClick={toggleSidebar}
               >
                 <Home size={20} color="#603017" />
                 <span className="font-medium" style={{ color: "#603017" }}>
-                  Home
+                  home
                 </span>
               </Link>
             </li>
@@ -79,7 +71,19 @@ export default function Sidebar() {
             </li>
             <li>
               <Link
-                href="/Login"
+                href="/absensi"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
+                onClick={toggleSidebar}
+              >
+                <UserRoundCheck size={20} color="#603017" />
+                <span className="font-medium" style={{ color: "#603017" }}>
+                  Absensi
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/login"
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
                 onClick={toggleSidebar}
               >
