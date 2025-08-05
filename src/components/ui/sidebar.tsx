@@ -59,13 +59,13 @@ export default function Sidebar() {
             </li>
             <li>
               <Link
-                href="/upload"
+                href="/tugas"
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
                 onClick={toggleSidebar}
               >
                 <Upload size={20} color="#603017" />
                 <span className="font-medium" style={{ color: "#603017" }}>
-                  Upload
+                  Tugas
                 </span>
               </Link>
             </li>
