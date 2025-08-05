@@ -43,10 +43,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Tambahkan kode ini di bagian bawah file */
 body {
   /* Ganti 'my-wallpaper.jpg' dengan nama file wallpaper Anda */
