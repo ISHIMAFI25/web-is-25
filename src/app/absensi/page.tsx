@@ -9,14 +9,25 @@ import {
 import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, User, Calendar } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AbsensiPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [formData, setFormData] = useState({
     statusKehadiran: "",
     jamMenyusul: ""
   });
+
+  // Update waktu setiap detik
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Cleanup interval saat component unmount
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +42,7 @@ export default function AbsensiPage() {
   };
 
   const getCurrentTime = () => {
-    const now = new Date();
-    return now.toLocaleTimeString('id-ID', { 
+    return currentTime.toLocaleTimeString('id-ID', { 
       hour: '2-digit', 
       minute: '2-digit',
       second: '2-digit'
@@ -40,8 +50,7 @@ export default function AbsensiPage() {
   };
 
   const getCurrentDate = () => {
-    const now = new Date();
-    return now.toLocaleDateString('id-ID', { 
+    return currentTime.toLocaleDateString('id-ID', { 
       weekday: 'long',
       year: 'numeric',
       month: 'long',
