@@ -1,4 +1,4 @@
-// src/app/upload/page.tsx
+// src/app/tugas/page.tsx
 // Ini adalah Server Component secara default
 
 import AssignmentList from '@/components/assignments/AssignmentList'; // Impor komponen AssignmentList

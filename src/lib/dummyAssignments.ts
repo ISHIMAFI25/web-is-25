@@ -41,14 +41,14 @@ const dummyAssignments: DayGroup[] = [
     assignments: [
       {
         id: 'task-3',
-        title: 'Judul tugas 3 (Sudah Lewat)',
+        title: 'Judul tugas 3',
         deadline: getDate(-3, 10, 0), // Contoh: 3 hari lalu pukul 10:00
         description: 'Analisis kasus studi ini dan berikan solusi Anda. Perhatikan batasan waktu yang ketat.',
         attachmentUrl: '/dummy-assignment-3.pdf',
       },
       {
         id: 'task-4',
-        title: 'Judul tugas 4 (Akan Datang)',
+        title: 'Judul tugas 4',
         deadline: getDate(2, 18, 30), // Contoh: 2 hari dari sekarang pukul 18:30
         description: 'Proyek kelompok tentang pengembangan aplikasi web sederhana. Kolaborasi adalah kunci.',
         attachmentUrl: '/dummy-assignment-4.pdf',
