@@ -30,7 +30,7 @@ export default function LoginPage() {
         INTELLEKTULLE SCHULE 2025
       </h1>
       {/* Menggunakan komponen LoginForm yang telah dibuat */}
-      <div className="relative z-20">
+      <div className="relative z-20 w-full flex justify-center">
         <LoginForm />
       </div>
     </div>

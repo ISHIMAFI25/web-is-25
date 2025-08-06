@@ -66,7 +66,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md border border-gray-200">
+    <div className="w-full max-w-lg p-8 space-y-6 bg-white rounded-lg shadow-md border border-gray-200">
       <h2 className="text-3xl font-bold text-center text-gray-900">Login Peserta</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -128,12 +128,6 @@ const LoginForm: React.FC<LoginFormProps> = () => {
           </button>
         </div>
       </form>
-      <div className="text-sm text-center">
-        Belum punya akun?{' '}
-        <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-          Daftar di sini
-        </a>
-      </div>
     </div>
   );
 };
