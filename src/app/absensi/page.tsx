@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { ArrowLeft, Clock, MapPin, User, Calendar } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, User, Calendar, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 
@@ -71,6 +71,16 @@ export default function AbsensiPage() {
 
   return (
     <div className="min-h-screen relative">
+      {/* Efek kompas di pojok */}
+      <div className="fixed top-10 right-10 w-32 h-32 opacity-30 z-10">
+        <Compass size={128} className="text-amber-800" />
+      </div>
+      
+      {/* Efek gulungan di pojok kiri */}
+      <div className="fixed bottom-10 left-10 w-24 h-24 opacity-35 z-10">
+        <ScrollText size={96} className="text-amber-900" />
+      </div>
+
       {/* Sidebar Component */}
       <Sidebar />
 

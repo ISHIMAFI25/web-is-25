@@ -7,12 +7,22 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { UserRoundCheck } from "lucide-react";
+import { UserRoundCheck, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen relative">
+      {/* Efek kompas di pojok */}
+      <div className="fixed top-10 right-10 w-32 h-32 opacity-30 z-10">
+        <Compass size={128} className="text-amber-800" />
+      </div>
+      
+      {/* Efek gulungan di pojok kiri */}
+      <div className="fixed bottom-10 left-10 w-24 h-24 opacity-35 z-10">
+        <ScrollText size={96} className="text-amber-900" />
+      </div>
+
       {/* Sidebar Component */}
       <Sidebar />
 

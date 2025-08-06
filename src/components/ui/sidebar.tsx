@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogIn, UserRoundCheck } from "lucide-react";
+import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User } from "lucide-react";
 import { useState } from "react";
 
 export default function Sidebar() {
@@ -83,13 +83,25 @@ export default function Sidebar() {
             </li>
             <li>
               <Link
+                href="/profil"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
+                onClick={toggleSidebar}
+              >
+                <User size={20} color="#603017" />
+                <span className="font-medium" style={{ color: "#603017" }}>
+                  Profil
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/login"
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
                 onClick={toggleSidebar}
               >
-                <LogIn size={20} color="#603017" />
+                <LogOut size={20} color="#603017" />
                 <span className="font-medium" style={{ color: "#603017" }}>
-                  Login
+                  Logout
                 </span>
               </Link>
             </li>
