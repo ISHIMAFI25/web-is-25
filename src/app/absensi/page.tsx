@@ -16,7 +16,9 @@ export default function AbsensiPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [formData, setFormData] = useState({
     statusKehadiran: "",
-    jamMenyusul: ""
+    jam: "",
+    alasan: "",
+    buktiFoto: null as File | null
   });
 
   // Update waktu setiap detik
@@ -34,11 +36,20 @@ export default function AbsensiPage() {
     setIsSubmitted(true);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    if (e.target.type === 'file') {
+      const fileInput = e.target as HTMLInputElement;
+      const file = fileInput.files?.[0] || null;
+      setFormData({
+        ...formData,
+        buktiFoto: file
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value
+      });
+    }
   };
 
   const getCurrentTime = () => {
@@ -191,8 +202,14 @@ export default function AbsensiPage() {
                     <h4 className="font-semibold mb-2">Detail Absensi:</h4>
                     <div className="text-left space-y-1">
                       <p><strong>Status Kehadiran:</strong> {formData.statusKehadiran}</p>
-                      {(formData.statusKehadiran === "Menyusul" || formData.statusKehadiran === "Meninggalkan") && formData.jamMenyusul && (
-                        <p><strong>Jam {formData.statusKehadiran}:</strong> {formData.jamMenyusul}</p>
+                      {(formData.statusKehadiran === "Menyusul" || formData.statusKehadiran === "Meninggalkan") && formData.jam && (
+                        <p><strong>Jam {formData.statusKehadiran}:</strong> {formData.jam}</p>
+                      )}
+                      {(formData.statusKehadiran !== "Hadir") && formData.alasan && (
+                        <p><strong>Alasan:</strong> {formData.alasan}</p>
+                      )}
+                      {(formData.statusKehadiran !== "Hadir") && formData.buktiFoto && (
+                        <p><strong>Bukti Foto:</strong> {formData.buktiFoto.name}</p>
                       )}
                     </div>
                   </div>
@@ -215,7 +232,9 @@ export default function AbsensiPage() {
                         setIsSubmitted(false);
                         setFormData({
                           statusKehadiran: "",
-                          jamMenyusul: ""
+                          jam: "",
+                          alasan: "",
+                          buktiFoto: null
                         });
                       }}
                       className="px-6 py-3 rounded-md hover:opacity-90 transition font-medium shadow-lg border-2 border-amber-800 transform hover:scale-105"
@@ -255,43 +274,106 @@ export default function AbsensiPage() {
                       >
                         <option value="">Pilih Status Kehadiran</option>
                         <option value="Hadir">Hadir</option>
-                        <option value="Izin">Izin</option>
+                        <option value="Tidak Hadir">Tidak Hadir</option>
                         <option value="Menyusul">Menyusul</option>
                         <option value="Meninggalkan">Meninggalkan</option>
                       </select>
                     </div>
 
-                    {/* Input Jam untuk Menyusul/Meninggalkan */}
-                    {(formData.statusKehadiran === "Menyusul" || formData.statusKehadiran === "Meninggalkan") && (
-                      <div>
-                        <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
-                          color: "#603017",
-                          fontFamily: "serif"
-                        }}>
-                          <Clock size={18} />
-                          Jam {formData.statusKehadiran}
-                        </label>
-                        <input
-                          type="time"
-                          name="jamMenyusul"
-                          value={formData.jamMenyusul}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full p-3 border-2 border-amber-800 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600"
-                          style={{ 
-                            backgroundColor: "#fef7ed",
+                    {/* Input untuk Tidak Hadir, Menyusul, Meninggalkan */}
+                    {(formData.statusKehadiran === "Tidak Hadir" || formData.statusKehadiran === "Menyusul" || formData.statusKehadiran === "Meninggalkan") && (
+                      <div className="space-y-4">
+                        {/* Input Jam untuk Menyusul/Meninggalkan */}
+                        {(formData.statusKehadiran === "Menyusul" || formData.statusKehadiran === "Meninggalkan") && (
+                          <div>
+                            <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
+                              color: "#603017",
+                              fontFamily: "serif"
+                            }}>
+                              <Clock size={18} />
+                              Jam {formData.statusKehadiran}
+                            </label>
+                            <input
+                              type="time"
+                              name="jam"
+                              value={formData.jam}
+                              onChange={handleInputChange}
+                              required
+                              className="w-full p-3 border-2 border-amber-800 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600"
+                              style={{ 
+                                backgroundColor: "#fef7ed",
+                                fontFamily: "serif"
+                              }}
+                            />
+                            <p className="text-sm mt-1" style={{ 
+                              color: "#8B4513",
+                              fontFamily: "serif"
+                            }}>
+                              {formData.statusKehadiran === "Menyusul" 
+                                ? "Masukkan jam ketika Anda akan menyusul" 
+                                : "Masukkan jam ketika Anda akan meninggalkan"
+                              }
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Input Alasan */}
+                        <div>
+                          <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
+                            color: "#603017",
                             fontFamily: "serif"
-                          }}
-                        />
-                        <p className="text-sm mt-1" style={{ 
-                          color: "#8B4513",
-                          fontFamily: "serif"
-                        }}>
-                          {formData.statusKehadiran === "Menyusul" 
-                            ? "Masukkan jam ketika Anda akan menyusul" 
-                            : "Masukkan jam ketika Anda akan meninggalkan"
-                          }
-                        </p>
+                          }}>
+                            <User size={18} />
+                            Alasan {formData.statusKehadiran}
+                          </label>
+                          <textarea
+                            name="alasan"
+                            value={formData.alasan}
+                            onChange={handleInputChange}
+                            required
+                            rows={3}
+                            placeholder={`Jelaskan alasan ${formData.statusKehadiran.toLowerCase()}...`}
+                            className="w-full p-3 border-2 border-amber-800 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600 resize-none"
+                            style={{ 
+                              backgroundColor: "#fef7ed",
+                              fontFamily: "serif"
+                            }}
+                          />
+                        </div>
+
+                        {/* Upload Bukti Foto */}
+                        <div>
+                          <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
+                            color: "#603017",
+                            fontFamily: "serif"
+                          }}>
+                            <MapPin size={18} />
+                            Bukti Foto
+                          </label>
+                          <input
+                            type="file"
+                            name="buktiFoto"
+                            onChange={handleInputChange}
+                            accept="image/*"
+                            required
+                            className="w-full p-3 border-2 border-amber-800 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                            style={{ 
+                              backgroundColor: "#fef7ed",
+                              fontFamily: "serif"
+                            }}
+                          />
+                          <p className="text-sm mt-1" style={{ 
+                            color: "#8B4513",
+                            fontFamily: "serif"
+                          }}>
+                            Upload foto sebagai bukti otentik (format: JPG, PNG, maksimal 5MB)
+                          </p>
+                          {formData.buktiFoto && (
+                            <p className="text-sm mt-2 text-green-600 font-medium">
+                              File terpilih: {formData.buktiFoto.name}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
 
