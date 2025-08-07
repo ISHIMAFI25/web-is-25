@@ -15,7 +15,6 @@ import { simpanAbsensi } from '@/lib/simpanAbsensi';
 
 export default function AbsensiPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,6 +23,9 @@ export default function AbsensiPage() {
     alasan: "",
     buktiFoto: null as File | null
   });
+  
+  // State untuk loading dan prevent double submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update waktu setiap detik
   useEffect(() => {
@@ -40,9 +42,13 @@ export default function AbsensiPage() {
     e.preventDefault();
     
     // Prevent double submission
-    if (isLoading) return;
+    if (isSubmitting) {
+      console.log('Already submitting, please wait...');
+      return;
+    }
     
-    setIsLoading(true);
+    setIsSubmitting(true);
+    
     try {
       let fotoUrl = '';
       // Hanya upload foto jika status bukan Hadir
@@ -70,7 +76,8 @@ export default function AbsensiPage() {
       console.error('Error details:', err);
       alert(`Error: ${err?.message || 'Terjadi error saat menyimpan absensi'}\nDetail: ${JSON.stringify(err)}`);
     } finally {
-      setIsLoading(false);
+      // Reset loading state setelah selesai (baik berhasil atau error)
+      setIsSubmitting(false);
     }
   };
 
@@ -141,7 +148,7 @@ export default function AbsensiPage() {
           <div className="text-center text-lg" style={{ color: "#8B4513", fontFamily: "serif" }}>
             <p className="flex items-center justify-center gap-2 mb-1">
               <Calendar size={18} />
-              {mounted ? getCurrentDate() : "Loading..."}
+              {getCurrentDate()}
             </p>
             <p className="flex items-center justify-center gap-2">
               <Clock size={18} />
@@ -243,7 +250,7 @@ export default function AbsensiPage() {
                     </div>
                     <h3 className="text-2xl font-bold mb-4">Terima Kasih!</h3>
                     <p className="text-lg mb-2">Absensi Anda telah tercatat pada:</p>
-                    <p className="font-bold text-xl mb-4">{mounted ? getCurrentTime() : "--:--:--"}</p>
+                    <p className="font-bold text-xl mb-4">{getCurrentTime()}</p>
                   </div>
                   
                   <div className="bg-amber-100 p-4 rounded-lg border-2 border-amber-800 mb-6">
@@ -432,23 +439,28 @@ export default function AbsensiPage() {
                   <div className="flex justify-center pt-4">
                     <button 
                       type="submit"
-                      disabled={isLoading}
-                      className={`px-8 py-4 rounded-md transition font-medium shadow-lg text-white border-2 border-amber-800 transform text-lg ${
-                        isLoading 
+                      disabled={isSubmitting || isSubmitted}
+                      className={`px-8 py-4 rounded-md transition font-medium shadow-lg text-white border-2 border-amber-800 text-lg ${
+                        isSubmitting || isSubmitted 
                           ? 'opacity-50 cursor-not-allowed' 
-                          : 'hover:opacity-90 hover:scale-105'
+                          : 'hover:opacity-90 transform hover:scale-105'
                       }`}
                       style={{ 
-                        backgroundColor: isLoading ? "#8B4513" : "#603017",
+                        backgroundColor: "#603017",
                         fontFamily: "serif",
                         textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
                       }}
                     >
-                      {isLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Menyimpan...</span>
-                        </div>
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Memproses...
+                        </span>
+                      ) : isSubmitted ? (
+                        'Berhasil Dikirim!'
                       ) : (
                         'Submit Absensi'
                       )}
