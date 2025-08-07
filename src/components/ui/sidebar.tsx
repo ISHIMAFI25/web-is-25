@@ -1,15 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User } from "lucide-react";
+import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user, isAdmin, signOut } = useAuth();
+  const router = useRouter();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+      setIsSidebarOpen(false);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  // Ambil username dari metadata atau email
+  const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
 
   return (
     <>
@@ -34,12 +51,23 @@ export default function Sidebar() {
         }`}
       >
         {/* Header Sidebar */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold" style={{ color: "#603017" }}>
+        <div className="flex flex-col p-4 border-b">
+          <h2 className="text-xl font-bold mb-2" style={{ color: "#603017" }}>
             Menu
           </h2>
-          {/* Ruang kosong untuk balance karena tombol close sudah di luar */}
-          <div className="w-6"></div>
+          {/* User Info */}
+          <div className="text-sm" style={{ color: "#603017" }}>
+            <div className="flex items-center gap-2">
+              <User size={16} />
+              <span>{username}</span>
+              {isAdmin && (
+                <div className="flex items-center gap-1 ml-2 px-2 py-1 bg-amber-100 rounded-full">
+                  <Shield size={12} />
+                  <span className="text-xs">Admin</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Menu Items */}
@@ -93,17 +121,31 @@ export default function Sidebar() {
                 </span>
               </Link>
             </li>
+            {/* Admin Menu - Hanya tampil jika user adalah admin */}
+            {isAdmin && (
+              <li>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition border border-amber-300 bg-amber-50"
+                  onClick={toggleSidebar}
+                >
+                  <Shield size={20} color="#603017" />
+                  <span className="font-medium" style={{ color: "#603017" }}>
+                    Admin Panel
+                  </span>
+                </Link>
+              </li>
+            )}
             <li>
-              <Link
-                href="/login"
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition"
-                onClick={toggleSidebar}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition w-full text-left"
               >
                 <LogOut size={20} color="#603017" />
                 <span className="font-medium" style={{ color: "#603017" }}>
                   Logout
                 </span>
-              </Link>
+              </button>
             </li>
           </ul>
         </nav>

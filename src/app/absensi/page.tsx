@@ -9,9 +9,10 @@ import {
 import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, User, Calendar, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useState, useEffect } from "react";
 
-export default function AbsensiPage() {
+function AbsensiContent() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [formData, setFormData] = useState({
@@ -411,5 +412,13 @@ export default function AbsensiPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function AbsensiPage() {
+  return (
+    <ProtectedRoute>
+      <AbsensiContent />
+    </ProtectedRoute>
   );
 }

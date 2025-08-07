@@ -3,6 +3,9 @@
 
 import { useState } from 'react';
 import { createUser } from '@/app/actions';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import Sidebar from '@/components/ui/sidebar';
+import { Compass, ScrollText } from 'lucide-react';
 
 // Komponen formulir untuk admin
 const AdminUserRegistrationForm = () => {
@@ -52,7 +55,20 @@ const AdminUserRegistrationForm = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md border border-gray-200">
+      {/* Efek kompas di pojok */}
+      <div className="fixed top-10 right-10 w-32 h-32 opacity-30 z-10">
+        <Compass size={128} className="text-amber-800" />
+      </div>
+      
+      {/* Efek gulungan di pojok kiri */}
+      <div className="fixed bottom-10 left-10 w-24 h-24 opacity-35 z-10">
+        <ScrollText size={96} className="text-amber-900" />
+      </div>
+
+      {/* Sidebar Component */}
+      <Sidebar />
+      
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md border border-gray-200 relative z-20">
         <h2 className="text-3xl font-bold text-center text-gray-900">Admin - Tambah Peserta</h2>
         <form onSubmit={handleCreateUser} className="space-y-6">
           <div>
@@ -117,4 +133,11 @@ const AdminUserRegistrationForm = () => {
   );
 };
 
-export default AdminUserRegistrationForm;
+// Halaman Admin dengan proteksi
+export default function AdminPage() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AdminUserRegistrationForm />
+    </ProtectedRoute>
+  );
+}

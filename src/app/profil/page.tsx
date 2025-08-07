@@ -9,9 +9,10 @@ import {
 import Link from "next/link";
 import { ArrowLeft, User, Shield, Eye, EyeOff, Map, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useState } from "react";
 
-export default function ProfilPage() {
+function ProfilContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -450,5 +451,13 @@ export default function ProfilPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProfilPage() {
+  return (
+    <ProtectedRoute>
+      <ProfilContent />
+    </ProtectedRoute>
   );
 }
