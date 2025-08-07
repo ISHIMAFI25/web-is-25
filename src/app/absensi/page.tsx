@@ -141,7 +141,7 @@ export default function AbsensiPage() {
           <div className="text-center text-lg" style={{ color: "#8B4513", fontFamily: "serif" }}>
             <p className="flex items-center justify-center gap-2 mb-1">
               <Calendar size={18} />
-              {getCurrentDate()}
+              {mounted ? getCurrentDate() : "Loading..."}
             </p>
             <p className="flex items-center justify-center gap-2">
               <Clock size={18} />
@@ -243,7 +243,7 @@ export default function AbsensiPage() {
                     </div>
                     <h3 className="text-2xl font-bold mb-4">Terima Kasih!</h3>
                     <p className="text-lg mb-2">Absensi Anda telah tercatat pada:</p>
-                    <p className="font-bold text-xl mb-4">{getCurrentTime()}</p>
+                    <p className="font-bold text-xl mb-4">{mounted ? getCurrentTime() : "--:--:--"}</p>
                   </div>
                   
                   <div className="bg-amber-100 p-4 rounded-lg border-2 border-amber-800 mb-6">
