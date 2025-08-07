@@ -10,10 +10,14 @@ import Link from "next/link";
 import { ArrowLeft, Clock, MapPin, User, Calendar, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
+import { uploadFotoToUploadThing } from '@/lib/uploadFotoToUploadThing';
+import { simpanAbsensi } from '@/lib/simpanAbsensi';
 
 export default function AbsensiPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
     statusKehadiran: "",
     jam: "",
@@ -23,6 +27,7 @@ export default function AbsensiPage() {
 
   // Update waktu setiap detik
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -31,9 +36,42 @@ export default function AbsensiPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    
+    // Prevent double submission
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      let fotoUrl = '';
+      // Hanya upload foto jika status bukan Hadir
+      if (
+        formData.statusKehadiran !== 'Hadir' &&
+        formData.buktiFoto
+      ) {
+        console.log('Uploading foto...');
+        fotoUrl = await uploadFotoToUploadThing(formData.buktiFoto);
+        console.log('Foto uploaded:', fotoUrl);
+      }
+      
+      const absensiData = {
+        status_kehadiran: formData.statusKehadiran,
+        jam: formData.statusKehadiran === 'Hadir' ? '' : formData.jam,
+        alasan: formData.statusKehadiran === 'Hadir' ? '' : formData.alasan,
+        foto_url: fotoUrl,
+        waktu: new Date().toISOString(),
+      };
+      
+      console.log('Saving absensi data:', absensiData);
+      await simpanAbsensi(absensiData);
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error('Error details:', err);
+      alert(`Error: ${err?.message || 'Terjadi error saat menyimpan absensi'}\nDetail: ${JSON.stringify(err)}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -107,7 +145,7 @@ export default function AbsensiPage() {
             </p>
             <p className="flex items-center justify-center gap-2">
               <Clock size={18} />
-              Waktu Saat Ini: {getCurrentTime()}
+              Waktu Saat Ini: {mounted ? getCurrentTime() : "--:--:--"}
             </p>
           </div>
         </div>
@@ -394,14 +432,26 @@ export default function AbsensiPage() {
                   <div className="flex justify-center pt-4">
                     <button 
                       type="submit"
-                      className="px-8 py-4 rounded-md hover:opacity-90 transition font-medium shadow-lg text-white border-2 border-amber-800 transform hover:scale-105 text-lg"
+                      disabled={isLoading}
+                      className={`px-8 py-4 rounded-md transition font-medium shadow-lg text-white border-2 border-amber-800 transform text-lg ${
+                        isLoading 
+                          ? 'opacity-50 cursor-not-allowed' 
+                          : 'hover:opacity-90 hover:scale-105'
+                      }`}
                       style={{ 
-                        backgroundColor: "#603017",
+                        backgroundColor: isLoading ? "#8B4513" : "#603017",
                         fontFamily: "serif",
                         textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
                       }}
                     >
-                      Submit Absensi
+                      {isLoading ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Menyimpan...</span>
+                        </div>
+                      ) : (
+                        'Submit Absensi'
+                      )}
                     </button>
                   </div>
                 </form>
