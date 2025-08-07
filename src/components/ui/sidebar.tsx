@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Calendar, Info } from "lucide-react";
+import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Calendar, Info, Database } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
@@ -162,18 +162,32 @@ export default function Sidebar() {
             </li>
             {/* Admin Menu - Hanya tampil jika user adalah admin */}
             {isAdmin && (
-              <li>
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition border border-amber-300 bg-amber-50"
-                  onClick={toggleSidebar}
-                >
-                  <Shield size={20} color="#603017" />
-                  <span className="font-medium" style={{ color: "#603017" }}>
-                    Admin Panel
-                  </span>
-                </Link>
-              </li>
+              <>
+                <li>
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition border border-amber-300 bg-amber-50"
+                    onClick={toggleSidebar}
+                  >
+                    <Shield size={20} color="#603017" />
+                    <span className="font-medium" style={{ color: "#603017" }}>
+                      Admin Panel
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/sql-editor"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition border border-amber-300 bg-amber-50"
+                    onClick={toggleSidebar}
+                  >
+                    <Database size={20} color="#603017" />
+                    <span className="font-medium" style={{ color: "#603017" }}>
+                      SQL Editor
+                    </span>
+                  </Link>
+                </li>
+              </>
             )}
             <li>
               <button

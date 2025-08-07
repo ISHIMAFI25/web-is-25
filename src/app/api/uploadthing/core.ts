@@ -24,9 +24,22 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete for userId:", metadata.uploadedBy);
-      console.log("file url", file.url);
+      console.log("file url", file.ufsUrl || file.url); // Use ufsUrl with fallback
       
       // Return data to the client
+      return { uploadedBy: metadata.uploadedBy };
+    }),
+  taskUploader: f({ 
+    image: { maxFileSize: "2MB" },
+    pdf: { maxFileSize: "2MB" }
+  })
+    .middleware(async ({ req }) => {
+      console.log("Task upload middleware running");
+      return { uploadedBy: "student" };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Task upload complete for:", metadata.uploadedBy);
+      console.log("Task file url:", file.ufsUrl || file.url); // Use ufsUrl with fallback
       return { uploadedBy: metadata.uploadedBy };
     }),
 } satisfies FileRouter;
