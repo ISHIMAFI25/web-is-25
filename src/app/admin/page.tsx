@@ -6,6 +6,7 @@ import { createUser } from '@/app/actions';
 
 // Komponen formulir untuk admin
 const AdminUserRegistrationForm = () => {
+  const [namaLengkap, setNamaLengkap] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ const AdminUserRegistrationForm = () => {
 
     try {
       // Memanggil Server Action untuk membuat user
-      const result = await createUser({ username, password });
+      const result = await createUser({ username, password, namaLengkap });
       
       if (result.error) {
         setMessage(result.error);
@@ -37,6 +38,7 @@ const AdminUserRegistrationForm = () => {
       } else {
         setMessage('Akun berhasil dibuat!');
         setIsError(false);
+        setNamaLengkap('');
         setUsername('');
         setPassword('');
       }
@@ -53,6 +55,20 @@ const AdminUserRegistrationForm = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md border border-gray-200">
         <h2 className="text-3xl font-bold text-center text-gray-900">Admin - Tambah Peserta</h2>
         <form onSubmit={handleCreateUser} className="space-y-6">
+          <div>
+            <label htmlFor="namaLengkap" className="block text-sm font-medium text-gray-700 text-left">
+              Nama Lengkap
+            </label>
+            <input
+              id="namaLengkap"
+              type="text"
+              value={namaLengkap}
+              onChange={(e) => setNamaLengkap(e.target.value)}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
+              placeholder="Nama Lengkap Peserta"
+            />
+          </div>
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 text-left">
               Username

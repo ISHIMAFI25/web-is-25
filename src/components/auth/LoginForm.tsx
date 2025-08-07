@@ -23,6 +23,9 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false); // State untuk password visibility
   const router = useRouter();
 
+  const ADMIN_USERNAME = "admin";
+  const ADMIN_PASSWORD = "admin123"; // Ganti sesuai kebutuhan
+
   // Fungsi yang dipanggil saat submit form login email/password
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +40,18 @@ const LoginForm: React.FC<LoginFormProps> = () => {
 
     setIsLoading(true);
 
+    // Cek admin
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      setMessage('Login admin berhasil!');
+      setIsError(false);
+      document.cookie = "is-admin=true; path=/";
+      router.push('/admin');
+      setIsLoading(false);
+      return;
+    }
+
     // Supabase memerlukan email, jadi kita buat email dummy dari username
-    const email = `${username}@ospek.com`;
+    const email = `${username}@mahasiswa.itb.ac.id`;
 
     // Menggunakan `supabase.auth.signInWithPassword()` untuk login
     const { error } = await supabase.auth.signInWithPassword({
