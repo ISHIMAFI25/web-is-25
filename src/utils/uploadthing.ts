@@ -12,6 +12,13 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload selesai untuk:", file.url);
     }),
+  taskUploader: f({ 
+    image: { maxFileSize: "2MB" },
+    pdf: { maxFileSize: "2MB" }
+  })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Task upload selesai untuk:", file.url);
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

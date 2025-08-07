@@ -5,6 +5,7 @@ import React, { useState, useMemo } from 'react';
 import { DayGroup, Assignment } from '@/types/assignment';
 import { format } from 'date-fns'; // For date formatting
 import { id } from 'date-fns/locale'; // For date formatting in Indonesian
+import TaskSubmission from './TaskSubmission';
 
 interface AssignmentListProps {
   assignmentsData: DayGroup[]; // Receives assignment data as props
@@ -190,6 +191,18 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData }) => {
                             Lihat Lampiran Tugas (PDF)
                           </a>
                         )}
+                        
+                        {/* Task Submission Component */}
+                        <TaskSubmission
+                          taskId={assignment.id}
+                          taskDay={dayGroup.day}
+                          taskTitle={assignment.title}
+                          deadline={assignment.deadline}
+                          onSubmissionSuccess={() => {
+                            // Optional: Add any callback logic here
+                            console.log('Task submitted successfully');
+                          }}
+                        />
                       </div>
                     )}
                   </div>
