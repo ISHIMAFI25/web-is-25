@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield } from "lucide-react";
+import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Calendar, Info } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isInformasiDayHovered, setIsInformasiDayHovered] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const router = useRouter();
 
@@ -120,6 +121,44 @@ export default function Sidebar() {
                   Profil
                 </span>
               </Link>
+            </li>
+            
+            {/* Informasi Day Menu dengan Hover Submenu */}
+            <li 
+              className="relative"
+              onMouseEnter={() => setIsInformasiDayHovered(true)}
+              onMouseLeave={() => setIsInformasiDayHovered(false)}
+            >
+              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition cursor-pointer">
+                <Calendar size={20} color="#603017" />
+                <span className="font-medium" style={{ color: "#603017" }}>
+                  Informasi Day
+                </span>
+                <svg 
+                  className={`ml-auto w-4 h-4 transition-transform ${isInformasiDayHovered ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="#603017" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+
+              {/* Submenu Day - Expand ke bawah */}
+              {isInformasiDayHovered && (
+                <div className="ml-6 mt-2 space-y-1 transition-all duration-200 ease-in-out">
+                  <Link
+                    href="/informasi/day0"
+                    className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition bg-gray-50 border-l-2 border-amber-300"
+                    onClick={toggleSidebar}
+                  >
+                    <Info size={16} color="#603017" />
+                    <span className="text-sm font-medium" style={{ color: "#603017" }}>
+                      Day 0
+                    </span>
+                  </Link>
+                </div>
+              )}
             </li>
             {/* Admin Menu - Hanya tampil jika user adalah admin */}
             {isAdmin && (
