@@ -11,19 +11,26 @@ import { ArrowLeft, Clock, MapPin, User, Calendar, Compass, ScrollText } from "l
 import Sidebar from "@/components/ui/sidebar";
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useState, useEffect } from "react";
+import { uploadFotoToUploadThing } from '@/lib/uploadFotoToUploadThing';
+import { simpanAbsensi } from '@/lib/simpanAbsensi';
 
 function AbsensiContent() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
     statusKehadiran: "",
     jam: "",
     alasan: "",
     buktiFoto: null as File | null
   });
+  
+  // State untuk loading dan prevent double submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update waktu setiap detik
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -32,9 +39,47 @@ function AbsensiContent() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log('Already submitting, please wait...');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      let fotoUrl = '';
+      // Hanya upload foto jika status bukan Hadir
+      if (
+        formData.statusKehadiran !== 'Hadir' &&
+        formData.buktiFoto
+      ) {
+        console.log('Uploading foto...');
+        fotoUrl = await uploadFotoToUploadThing(formData.buktiFoto);
+        console.log('Foto uploaded:', fotoUrl);
+      }
+      
+      const absensiData = {
+        status_kehadiran: formData.statusKehadiran,
+        jam: formData.statusKehadiran === 'Hadir' ? '' : formData.jam,
+        alasan: formData.statusKehadiran === 'Hadir' ? '' : formData.alasan,
+        foto_url: fotoUrl,
+        waktu: new Date().toISOString(),
+      };
+      
+      console.log('Saving absensi data:', absensiData);
+      await simpanAbsensi(absensiData);
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error('Error details:', err);
+      alert(`Error: ${err?.message || 'Terjadi error saat menyimpan absensi'}\nDetail: ${JSON.stringify(err)}`);
+    } finally {
+      // Reset loading state setelah selesai (baik berhasil atau error)
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -108,7 +153,7 @@ function AbsensiContent() {
             </p>
             <p className="flex items-center justify-center gap-2">
               <Clock size={18} />
-              Waktu Saat Ini: {getCurrentTime()}
+              Waktu Saat Ini: {mounted ? getCurrentTime() : "--:--:--"}
             </p>
           </div>
         </div>
@@ -395,14 +440,31 @@ function AbsensiContent() {
                   <div className="flex justify-center pt-4">
                     <button 
                       type="submit"
-                      className="px-8 py-4 rounded-md hover:opacity-90 transition font-medium shadow-lg text-white border-2 border-amber-800 transform hover:scale-105 text-lg"
+                      disabled={isSubmitting || isSubmitted}
+                      className={`px-8 py-4 rounded-md transition font-medium shadow-lg text-white border-2 border-amber-800 text-lg ${
+                        isSubmitting || isSubmitted 
+                          ? 'opacity-50 cursor-not-allowed' 
+                          : 'hover:opacity-90 transform hover:scale-105'
+                      }`}
                       style={{ 
                         backgroundColor: "#603017",
                         fontFamily: "serif",
                         textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
                       }}
                     >
-                      Submit Absensi
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Memproses...
+                        </span>
+                      ) : isSubmitted ? (
+                        'Berhasil Dikirim!'
+                      ) : (
+                        'Submit Absensi'
+                      )}
                     </button>
                   </div>
                 </form>
