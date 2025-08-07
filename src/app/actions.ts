@@ -16,14 +16,15 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
 interface CreateUserParams {
   username: string;
   password?: string;
+  namaLengkap: string;
 }
 
 // Fungsi Server Action untuk membuat user baru
-export async function createUser({ username, password }: CreateUserParams) {
+export async function createUser({ username, password, namaLengkap }: CreateUserParams) {
   try {
     // Supabase memerlukan email, jadi kita buat email dummy dari username
     // Ganti 'namadomainmu.com' dengan domain yang relevan untuk proyekmu.
-    const email = `${username}@ospek.com`; 
+    const email = `${username}@mahasiswa.itb.ac.id`; 
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -31,6 +32,7 @@ export async function createUser({ username, password }: CreateUserParams) {
       email_confirm: true, // Otomatis mengkonfirmasi email
       user_metadata: {
         username,
+        namaLengkap, // simpan nama lengkap di metadata
       },
     });
 

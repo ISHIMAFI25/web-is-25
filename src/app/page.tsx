@@ -9,8 +9,38 @@ import {
 import Link from "next/link";
 import { UserRoundCheck, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function HomePage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect ke login jika belum login
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold" style={{ color: "#603017" }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render anything (will redirect)
+  if (!user) {
+    return null;
+  }
   return (
     <div className="min-h-screen relative">
       {/* Efek kompas di pojok */}

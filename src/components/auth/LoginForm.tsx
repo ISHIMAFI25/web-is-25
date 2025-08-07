@@ -2,11 +2,12 @@
 'use client';
 
 // Impor hook yang dibutuhkan dari React dan Next.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Impor instance Supabase Client yang sudah kita buat
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth-context';
 
 // Impor ikon dari Lucide untuk show/hide password
 import { Eye, EyeOff } from 'lucide-react';
@@ -22,6 +23,31 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   const [isError, setIsError] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false); // State untuk password visibility
   const router = useRouter();
+  const { user, checkSession } = useAuth();
+
+  const ADMIN_USERNAME = "admin";
+  const ADMIN_PASSWORD = "admin123"; // Ganti sesuai kebutuhan
+
+  // Redirect jika sudah login
+  useEffect(() => {
+    const redirectUser = async () => {
+      if (user) {
+        // Cek apakah admin
+        const isAdmin = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('is-admin='))
+          ?.split('=')[1] === 'true';
+        
+        if (isAdmin) {
+          router.push('/admin');
+        } else {
+          router.push('/tugas');
+        }
+      }
+    };
+
+    redirectUser();
+  }, [user, router]);
 
   // Fungsi yang dipanggil saat submit form login email/password
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,29 +63,55 @@ const LoginForm: React.FC<LoginFormProps> = () => {
 
     setIsLoading(true);
 
-    // Supabase memerlukan email, jadi kita buat email dummy dari username
-    const email = `${username}@ospek.com`;
+    try {
+      // Cek admin
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Set admin cookie dengan security
+        document.cookie = `is-admin=true; path=/; max-age=${60 * 60 * 24}; SameSite=Strict`;
+        setMessage('Login admin berhasil!');
+        setIsError(false);
+        router.push('/admin');
+        setIsLoading(false);
+        return;
+      }
 
-    // Menggunakan `supabase.auth.signInWithPassword()` untuk login
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
+      // Supabase memerlukan email, jadi kita buat email dummy dari username
+      const email = `${username}@mahasiswa.itb.ac.id`;
 
-    if (error) {  
-      // Ganti pesan error jika password salah
-      const customMessage =
-        error.message === "Invalid login credentials"
-          ? "NIM/PASSWORD SALAH"
-          : error.message;
-      setMessage(customMessage);
+      // Menggunakan `supabase.auth.signInWithPassword()` untuk login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {  
+        // Ganti pesan error jika password salah
+        const customMessage =
+          error.message === "Invalid login credentials"
+            ? "NIM/PASSWORD SALAH"
+            : error.message;
+        setMessage(customMessage);
+        setIsError(true);
+      } else if (data.user) {
+        // Jika login berhasil
+        setMessage('Login berhasil!');
+        setIsError(false);
+        
+        // Verifikasi session berhasil dibuat
+        const sessionValid = await checkSession();
+        if (sessionValid) {
+          // Session akan otomatis di-handle oleh AuthProvider
+          // Mengarahkan pengguna ke halaman /tugas
+          router.push('/tugas');
+        } else {
+          setMessage('Terjadi kesalahan dalam membuat session.');
+          setIsError(true);
+        }
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setMessage('Terjadi kesalahan sistem. Silakan coba lagi.');
       setIsError(true);
-    } else {
-      // Jika login berhasil
-      setMessage('Login berhasil!');
-      setIsError(false);
-      // Mengarahkan pengguna ke halaman /upload
-      router.push('/tugas');
     }
 
     setIsLoading(false);
