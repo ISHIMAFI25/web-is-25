@@ -10,22 +10,36 @@ import Link from "next/link";
 import { ArrowLeft, User, Shield, Eye, EyeOff, Map, Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from '@/lib/auth-context';
+import { updateUserPassword } from '@/app/actions';
 
 function ProfilContent() {
+  const { user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
 
-  // Data profil (dalam aplikasi nyata, ini akan dari database/API)
+  // Auto-hide success message after 5 seconds
+  useEffect(() => {
+    if (message && message.type === 'success') {
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  // Data profil dari user yang sedang login
   const profileData = {
-    nama: "Frodo Baggins",
-    nim: "200101010",
-    email: "frodo.baggins@shire.edu"
+    nama: user?.user_metadata?.namaLengkap || user?.email || "Nama tidak tersedia",
+    nim: user?.user_metadata?.username || "Username tidak tersedia"
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,17 +49,58 @@ function ProfilContent() {
     });
   };
 
-  const handleSubmitPassword = (e: React.FormEvent) => {
+  const handleSubmitPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic untuk ganti password akan ditambahkan di sini
-    console.log("Password change submitted:", passwordData);
-    alert("Password berhasil diubah!");
-    setIsChangingPassword(false);
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: ""
-    });
+    setMessage(null);
+    
+    // Validasi input
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setMessage({ type: 'error', text: 'Semua field harus diisi' });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setMessage({ type: 'error', text: 'Konfirmasi password tidak cocok' });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setMessage({ type: 'error', text: 'Password baru minimal 6 karakter' });
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      setMessage({ type: 'error', text: 'Password baru harus berbeda dari password lama' });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const userEmail = user?.email;
+      if (!userEmail) {
+        setMessage({ type: 'error', text: 'Email user tidak ditemukan' });
+        return;
+      }
+
+      const result = await updateUserPassword(userEmail, passwordData.currentPassword, passwordData.newPassword);
+      
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Password berhasil diubah!' });
+        setIsChangingPassword(false);
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
+        });
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Gagal mengubah password' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Terjadi kesalahan sistem' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -198,23 +253,6 @@ function ProfilContent() {
                       {profileData.nim}
                     </div>
                   </div>
-
-                  <div>
-                    <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
-                      color: "#603017",
-                      fontFamily: "serif"
-                    }}>
-                      <Map size={18} />
-                      Alamat Surat Burung Hantu
-                    </label>
-                    <div className="w-full p-3 border-2 border-amber-800 rounded-md" style={{ 
-                      backgroundColor: "#fef7ed",
-                      fontFamily: "serif",
-                      color: "#603017"
-                    }}>
-                      {profileData.email}
-                    </div>
-                  </div>
                 </div>
               </div>
             </CardContent>
@@ -282,6 +320,13 @@ function ProfilContent() {
               <div className="absolute bottom-6 right-6 w-3 h-5 rounded-full bg-amber-800 opacity-12"></div>
               
               <div className="space-y-6 relative z-10">
+                {/* Success Message Outside Form */}
+                {message && message.type === 'success' && !isChangingPassword && (
+                  <div className="p-3 rounded-md border bg-green-50 text-green-800 border-green-200 text-center" style={{ fontFamily: "serif" }}>
+                    {message.text}
+                  </div>
+                )}
+
                 {!isChangingPassword ? (
                   <div className="text-center">
                     <div className="w-20 h-20 mx-auto mb-6 rounded-full border-4 border-amber-800 flex items-center justify-center" style={{ backgroundColor: "#8B4513" }}>
@@ -322,6 +367,17 @@ function ProfilContent() {
                     }}>
                       Perbarui Segel Keamanan
                     </h3>
+
+                    {/* Message Display */}
+                    {message && (
+                      <div className={`p-3 rounded-md border ${
+                        message.type === 'success' 
+                          ? 'bg-green-50 text-green-800 border-green-200' 
+                          : 'bg-red-50 text-red-800 border-red-200'
+                      }`} style={{ fontFamily: "serif" }}>
+                        {message.text}
+                      </div>
+                    )}
                     
                     <div>
                       <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
@@ -401,26 +457,29 @@ function ProfilContent() {
                     <div className="flex gap-4 pt-4">
                       <button 
                         type="submit"
-                        className="flex-1 px-6 py-3 rounded-md hover:opacity-90 transition font-medium shadow-lg text-white border-2 border-amber-800 transform hover:scale-105"
+                        disabled={loading}
+                        className="flex-1 px-6 py-3 rounded-md hover:opacity-90 transition font-medium shadow-lg text-white border-2 border-amber-800 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         style={{ 
                           backgroundColor: "#603017",
                           fontFamily: "serif",
                           textShadow: "1px 1px 2px rgba(0,0,0,0.5)"
                         }}
                       >
-                        Simpan Perubahan
+                        {loading ? 'Mengubah Password...' : 'Simpan Perubahan'}
                       </button>
                       <button 
                         type="button"
+                        disabled={loading}
                         onClick={() => {
                           setIsChangingPassword(false);
+                          setMessage(null);
                           setPasswordData({
                             currentPassword: "",
                             newPassword: "",
                             confirmPassword: ""
                           });
                         }}
-                        className="flex-1 px-6 py-3 rounded-md hover:opacity-90 transition font-medium shadow-lg border-2 border-amber-800 transform hover:scale-105"
+                        className="flex-1 px-6 py-3 rounded-md hover:opacity-90 transition font-medium shadow-lg border-2 border-amber-800 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         style={{ 
                           backgroundColor: "transparent",
                           color: "#603017",
