@@ -1,20 +1,22 @@
 // src/components/assignments/AssignmentList.tsx
 "use client"; // This is a Client Component because there is user interaction (search, expand)
 
-import React, { useState, useMemo } from 'react';
-import { DayGroup } from '@/types/assignment';
+import React, { useState, useMemo, useEffect } from 'react';
+import { DayGroup, Assignment } from '@/types/assignment';
 import { format } from 'date-fns'; // For date formatting
 import { id } from 'date-fns/locale'; // For date formatting in Indonesian
-import TaskSubmission from './TaskSubmission';
+import TaskSubmissionWithLink from './TaskSubmissionWithLink';
 
 interface AssignmentListProps {
-  assignmentsData: DayGroup[]; // Receives assignment data as props
+  assignmentsData?: DayGroup[]; // Make it optional since we'll load from API
 }
 
-const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData }) => {
+const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData: initialData }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  // State to track which assignment is expanded
   const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null);
+  
+  // Use the data passed from parent directly
+  const assignmentsData = initialData || [];
 
   // Function to check if the deadline has passed
   const isDeadlinePassed = (deadline: string): boolean => {
@@ -97,11 +99,31 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData }) => {
 
       {/* Assignment List */}
       <div className="space-y-6">
-        {filteredAssignments.length === 0 && (
-          <p className="text-center" style={{ color: "#8B4513" }}>Tidak ada tugas yang ditemukan.</p>
-        )}
-
-        {filteredAssignments.map((dayGroup) => (
+        {assignmentsData.length === 0 ? (
+          <div className="text-center py-12 px-6 rounded-lg border-2" style={{
+            backgroundColor: "#fff2d4",
+            borderColor: "#A0522D",
+            color: "#8B4513"
+          }}>
+            <h3 className="text-lg font-semibold mb-2">Belum Ada Tugas</h3>
+            <p className="text-sm mb-4">
+              Belum ada tugas yang tersedia saat ini. Admin sedang menyiapkan tugas untuk Anda.
+            </p>
+            <p className="text-xs opacity-75">
+              Silakan periksa kembali nanti atau hubungi admin jika ada pertanyaan.
+            </p>
+          </div>
+        ) : filteredAssignments.length === 0 ? (
+          <div className="text-center py-8 px-6 rounded-lg border-2" style={{
+            backgroundColor: "#fff2d4",
+            borderColor: "#A0522D",
+            color: "#8B4513"
+          }}>
+            <p className="mb-2">Tidak ada tugas yang cocok dengan pencarian "{searchTerm}"</p>
+            <p className="text-sm opacity-75">Coba gunakan kata kunci yang berbeda</p>
+          </div>
+        ) : (
+          filteredAssignments.map((dayGroup) => (
           <div key={dayGroup.day} className="p-4 rounded-lg shadow-md border-2"
             style={{
               backgroundColor: "#fff2d4",
@@ -193,11 +215,12 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData }) => {
                         )}
                         
                         {/* Task Submission Component */}
-                        <TaskSubmission
+                        <TaskSubmissionWithLink
                           taskId={assignment.id}
                           taskDay={dayGroup.day}
                           taskTitle={assignment.title}
                           deadline={assignment.deadline}
+                          assignment={assignment}
                           onSubmissionSuccess={() => {
                             // Optional: Add any callback logic here
                             console.log('Task submitted successfully');
@@ -210,7 +233,8 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData }) => {
               })}
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
