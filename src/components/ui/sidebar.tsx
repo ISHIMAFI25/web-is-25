@@ -5,12 +5,14 @@ import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Ca
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
+import DaysSidebar from "@/components/DaysSidebar";
 
 export default function Sidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isInformasiDayHovered, setIsInformasiDayHovered] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const router = useRouter();
+
+  console.log('🎯 Sidebar: user =', user?.email, 'isAdmin =', isAdmin);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -123,42 +125,9 @@ export default function Sidebar() {
               </Link>
             </li>
             
-            {/* Informasi Day Menu dengan Hover Submenu */}
-            <li 
-              className="relative"
-              onMouseEnter={() => setIsInformasiDayHovered(true)}
-              onMouseLeave={() => setIsInformasiDayHovered(false)}
-            >
-              <div className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition cursor-pointer">
-                <Calendar size={18} className="md:w-5 md:h-5" color="#603017" />
-                <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
-                  Informasi Day
-                </span>
-                <svg 
-                  className={`ml-auto w-3 h-3 md:w-4 md:h-4 transition-transform ${isInformasiDayHovered ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="#603017" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-
-              {/* Submenu Day - Expand ke bawah */}
-              {isInformasiDayHovered && (
-                <div className="ml-4 md:ml-6 mt-2 space-y-1 transition-all duration-200 ease-in-out">
-                  <Link
-                    href="/informasi/day0"
-                    className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 rounded-lg hover:bg-gray-100 transition bg-gray-50 border-l-2 border-amber-300"
-                    onClick={toggleSidebar}
-                  >
-                    <Info size={14} className="md:w-4 md:h-4" color="#603017" />
-                    <span className="text-xs md:text-sm font-medium" style={{ color: "#603017" }}>
-                      Day 0
-                    </span>
-                  </Link>
-                </div>
-              )}
+            {/* Days Information */}
+            <li className="mb-4">
+              <DaysSidebar isAdmin={isAdmin} />
             </li>
             {/* Admin Menu - Hanya tampil jika user adalah admin */}
             {isAdmin && (

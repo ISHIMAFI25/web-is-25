@@ -4,6 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { Assignment, DayGroup, TaskForm } from '@/types/assignment';
 import { Plus, Edit, Trash2, Save, X, Upload, Link, FileText } from 'lucide-react';
+import FileUploadWidget from '@/components/upload/FileUploadWidget';
+import LinkAttachmentWidget from '@/components/upload/LinkAttachmentWidget';
+import { getFileIcon, getFileName } from '@/lib/uploadHelpers';
 
 interface TaskManagerProps {
   isAdmin: boolean;
@@ -21,7 +24,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
     acceptsLinks: false,
     acceptsFiles: true,
     maxFileSize: 2,
-    instructionFiles: []
+    instructionFiles: [],
+    instructionLinks: []
   });
 
   // Show notification helper
@@ -65,7 +69,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
       acceptsLinks: false,
       acceptsFiles: true,
       maxFileSize: 2,
-      instructionFiles: []
+      instructionFiles: [],
+      instructionLinks: []
     });
   };
 
@@ -191,97 +196,24 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
       acceptsLinks: task.acceptsLinks || false,
       acceptsFiles: task.acceptsFiles !== false,
       maxFileSize: task.maxFileSize || 2,
-      instructionFiles: task.instructionFiles || []
+      instructionFiles: task.instructionFiles || [],
+      instructionLinks: task.instructionLinks || []
     });
     setIsEditing(task.id);
   };
 
-  const handleFileUpload = (files: FileList | null) => {
-    if (!files) return;
-    
-    // Convert FileList to array and create file info objects
-    const fileInfos = Array.from(files).map(file => {
-      // Create object URL for preview/download
-      const objectUrl = URL.createObjectURL(file);
-      
-      // Create file info object with metadata
-      return {
-        url: objectUrl,
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        lastModified: file.lastModified
-      };
-    });
-    
-    // Add file URLs to the form (for backward compatibility, we'll store just URLs)
-    const fileUrls = fileInfos.map(fileInfo => fileInfo.url);
+  const handleFileUpload = (files: (string | { name: string; url: string; size?: number })[]) => {
     setEditForm(prev => ({
       ...prev,
-      instructionFiles: [...prev.instructionFiles, ...fileUrls]
-    }));
-    
-    // Show notification about uploaded files
-    showNotification(`${fileInfos.length} file berhasil ditambahkan!`);
-  };
-
-  const removeInstructionFile = (index: number) => {
-    setEditForm(prev => ({
-      ...prev,
-      instructionFiles: prev.instructionFiles.filter((_, i) => i !== index)
+      instructionFiles: files
     }));
   };
 
-  // Helper function to get file name from URL or path
-  const getFileName = (filePath: string): string => {
-    // If it's a blob URL, try to get the original filename if available
-    if (filePath.startsWith('blob:')) {
-      // For new uploads, we might not have the original name, so show generic name
-      return `file-${Date.now()}`;
-    }
-    
-    // For regular paths, get the filename
-    const parts = filePath.split('/');
-    return parts[parts.length - 1] || 'unknown-file';
-  };
-
-  // Helper function to get file extension for icon
-  const getFileExtension = (filename: string): string => {
-    const parts = filename.split('.');
-    return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
-  };
-
-  // Helper function to get file type icon
-  const getFileIcon = (filename: string) => {
-    const ext = getFileExtension(filename);
-    
-    // Document files
-    if (['pdf'].includes(ext)) return '📄';
-    if (['doc', 'docx'].includes(ext)) return '📝';
-    if (['ppt', 'pptx'].includes(ext)) return '📊';
-    if (['xls', 'xlsx'].includes(ext)) return '📈';
-    
-    // Image files
-    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(ext)) return '🖼️';
-    
-    // Archive files
-    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return '📦';
-    
-    // Video files
-    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'].includes(ext)) return '🎥';
-    
-    // Audio files
-    if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) return '🎵';
-    
-    // Code files
-    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json', 'xml'].includes(ext)) return '💻';
-    if (['py', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return '⚙️';
-    
-    // Text files
-    if (['txt', 'md', 'readme'].includes(ext)) return '📃';
-    
-    // Default file icon
-    return '📎';
+  const handleLinkAttachment = (links: { name: string; url: string }[]) => {
+    setEditForm(prev => ({
+      ...prev,
+      instructionLinks: links
+    }));
   };
 
   if (!isAdmin) {
@@ -440,65 +372,25 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
 
               {/* Instruction Files */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  File Petunjuk
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => handleFileUpload(e.target.files)}
-                    className="hidden"
-                    id="instruction-files"
-                  />
-                  <label
-                    htmlFor="instruction-files"
-                    className="flex flex-col items-center cursor-pointer"
-                  >
-                    <FileText size={32} className="text-gray-400 mb-2" />
-                    <span className="text-sm text-gray-600">
-                      Klik untuk upload file petunjuk
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      Semua jenis file diterima (PDF, DOC, PPT, ZIP, IMG, dll)
-                    </span>
-                  </label>
-                </div>
+                <FileUploadWidget
+                  files={editForm.instructionFiles}
+                  onFilesChange={handleFileUpload}
+                  endpoint="instructionFilesUploader"
+                  label="File Petunjuk"
+                  description="Upload file petunjuk untuk tugas ini"
+                  multiple={true}
+                  maxSizeMB={8}
+                />
+              </div>
 
-                {editForm.instructionFiles.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-sm text-gray-600 mb-2">
-                      File yang ditambahkan ({editForm.instructionFiles.length}):
-                    </p>
-                    {editForm.instructionFiles.map((file, index) => {
-                      const fileName = getFileName(file);
-                      const fileIcon = getFileIcon(fileName);
-                      
-                      return (
-                        <div key={index} className="flex items-center justify-between bg-gray-100 p-3 rounded-lg border border-gray-200">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-lg">{fileIcon}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-800 truncate">
-                                {fileName}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {getFileExtension(fileName).toUpperCase()} File
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => removeInstructionFile(index)}
-                            className="ml-2 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                            title="Hapus file"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              {/* Instruction Links */}
+              <div>
+                <LinkAttachmentWidget
+                  links={editForm.instructionLinks}
+                  onLinksChange={handleLinkAttachment}
+                  label="Link Petunjuk"
+                  description="Tambahkan link petunjuk untuk tugas ini"
+                />
               </div>
 
               {/* Action Buttons */}

@@ -515,17 +515,25 @@ const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({
         <div className="mb-4 p-3 bg-blue-50 rounded-lg">
           <h4 className="text-sm font-medium text-blue-800 mb-2">File Petunjuk:</h4>
           <div className="space-y-1">
-            {assignment.instructionFiles.map((file, index) => (
-              <a
-                key={index}
-                href={file}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-800 underline block"
-              >
-                📄 {file.split('/').pop()}
-              </a>
-            ))}
+            {assignment.instructionFiles.map((file, index) => {
+              // Handle both string format and object format
+              const fileUrl = typeof file === 'string' ? file : file.url;
+              const fileName = typeof file === 'string' 
+                ? file.split('/').pop() || 'file'
+                : file.name;
+              
+              return (
+                <a
+                  key={index}
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline block"
+                >
+                  📄 {fileName}
+                </a>
+              );
+            })}
           </div>
         </div>
       )}

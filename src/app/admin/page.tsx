@@ -5,8 +5,9 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/ui/sidebar';
 import AdminUserRegistrationForm from '@/components/admin/AdminUserRegistrationForm';
 import TaskManager from '@/components/admin/TaskManager';
+import DayManager from '@/components/admin/DayManager';
 import { useState } from 'react';
-import { Users, FileText, Settings } from 'lucide-react';
+import { Users, FileText, Calendar, Settings } from 'lucide-react';
 
 export default function AdminPage() {
   return (
@@ -21,7 +22,7 @@ export default function AdminPage() {
 
 // Halaman Admin dengan proteksi
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'users' | 'tasks'>('tasks');
+  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'days'>('tasks');
   
   return (
     <div 
@@ -59,6 +60,17 @@ const AdminDashboard = () => {
                     Manajemen Tugas
                   </button>
                   <button
+                    onClick={() => setActiveTab('days')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === 'days'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4 inline-block mr-2" />
+                    Manajemen Day
+                  </button>
+                  <button
                     onClick={() => setActiveTab('users')}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTab === 'users'
@@ -78,6 +90,12 @@ const AdminDashboard = () => {
             {activeTab === 'tasks' && (
               <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5 p-4 md:p-6">
                 <TaskManager isAdmin={true} />
+              </div>
+            )}
+
+            {activeTab === 'days' && (
+              <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5 p-4 md:p-6">
+                <DayManager isAdmin={true} />
               </div>
             )}
             

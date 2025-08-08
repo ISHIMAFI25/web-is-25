@@ -20,7 +20,8 @@ export async function PUT(
       acceptsLinks,
       acceptsFiles,
       maxFileSize,
-      instructionFiles
+      instructionFiles,
+      instructionLinks
     } = body;
 
     // Update task
@@ -32,6 +33,7 @@ export async function PUT(
         deadline,
         description,
         instruction_files: instructionFiles,
+        instruction_links: instructionLinks || [],
         accepts_links: acceptsLinks,
         accepts_files: acceptsFiles,
         max_file_size: maxFileSize,
