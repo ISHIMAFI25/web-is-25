@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
           is_active: true, 
           start_time: new Date().toISOString(),
           end_time: null,
-          created_by_admin: adminEmail,
+          created_by: adminEmail,
           updated_at: new Date().toISOString()
         })
         .eq('id', sessionId)
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         .update({ 
           is_active: false, 
           end_time: new Date().toISOString(),
-          created_by_admin: adminEmail,
+          created_by: adminEmail,
           updated_at: new Date().toISOString()
         })
         .eq('id', sessionId)
@@ -165,7 +165,7 @@ export async function PUT(request: NextRequest) {
         day_number: dayNumber,
         day_title: dayTitle,
         is_active: false,
-        created_by_admin: adminEmail
+        created_by: adminEmail
       })
       .select()
       .single();

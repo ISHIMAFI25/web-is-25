@@ -9,7 +9,7 @@ interface AttendanceSession {
   start_time: string | null;
   end_time: string | null;
   created_at: string;
-  created_by_admin: string;
+  created_by: string;
 }
 
 export default function AttendanceSessionManager() {
@@ -252,7 +252,7 @@ export default function AttendanceSessionManager() {
                     </div>
                     
                     <div className="text-sm text-gray-600 space-y-1">
-                      <p>Dibuat oleh: {session.created_by_admin}</p>
+                      <p>Dibuat oleh: {session.created_by}</p>
                       <p>Dibuat: {formatDateTime(session.created_at)}</p>
                       {session.start_time && (
                         <p>Dimulai: {formatDateTime(session.start_time)}</p>
