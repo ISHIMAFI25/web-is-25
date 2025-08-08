@@ -136,14 +136,8 @@ function ProfilContent() {
               fontFamily: "serif",
               textShadow: "2px 2px 4px rgba(0,0,0,0.3)"
             }}>
-              Peta Petualang
+              Profil User
             </h1>
-            <p className="text-xl" style={{ 
-              color: "#8B4513", 
-              fontFamily: "serif"
-            }}>
-              ~ Profil Sang Penjelajah ~
-            </p>
           </div>
         </div>
 
@@ -190,7 +184,7 @@ function ProfilContent() {
                 textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                 fontFamily: "serif"
               }}>
-                Pergamena Identitas
+                Informasi User
               </CardTitle>
             </CardHeader>
 
@@ -226,7 +220,7 @@ function ProfilContent() {
                       fontFamily: "serif"
                     }}>
                       <User size={18} />
-                      Nama Petualang
+                      Nama
                     </label>
                     <div className="w-full p-3 border-2 border-amber-800 rounded-md" style={{ 
                       backgroundColor: "#fef7ed",
@@ -243,7 +237,7 @@ function ProfilContent() {
                       fontFamily: "serif"
                     }}>
                       <ScrollText size={18} />
-                      Nomor Identitas Magis (NIM)
+                      Nomor Identitas Mahasiswa (NIM)
                     </label>
                     <div className="w-full p-3 border-2 border-amber-800 rounded-md" style={{ 
                       backgroundColor: "#fef7ed",
@@ -337,14 +331,14 @@ function ProfilContent() {
                       color: "#603017",
                       fontFamily: "serif"
                     }}>
-                      Ganti Kata Sandi Rahasia
+                      Ganti Kata Sandi
                     </h3>
                     
                     <p className="text-lg mb-6" style={{ 
                       color: "#8B4513",
                       fontFamily: "serif"
                     }}>
-                      Lindungi akun petualangan Anda dengan kata sandi yang kuat dan aman
+                      Lindungi akun Anda dengan kata sandi yang kuat dan aman
                     </p>
                     
                     <button 

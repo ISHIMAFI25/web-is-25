@@ -361,34 +361,34 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
 
   if (submissionData?.is_submitted) {
     return (
-      <div className="mt-4 p-4 rounded-lg border-2 border-green-500 bg-green-50">
-        <div className="flex items-center justify-between">
+      <div className="mt-4 p-3 md:p-4 rounded-lg border-2 border-green-500 bg-green-50">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center space-x-2">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span className="font-semibold text-green-800">Tugas Telah Dikumpulkan</span>
+            <span className="font-semibold text-green-800 text-sm md:text-base">Tugas Telah Dikumpulkan</span>
           </div>
           {!isDeadlinePassed() && (
             <button
               onClick={unsubmitTask}
               disabled={isSubmitting || hasClickedUnsubmit}
-              className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50"
+              className="px-3 py-2 bg-red-500 text-white text-xs md:text-sm rounded hover:bg-red-600 disabled:opacity-50 w-full sm:w-auto"
             >
               {isSubmitting ? 'Processing...' : hasClickedUnsubmit ? 'Sedang Diproses...' : 'Batalkan Pengumpulan'}
             </button>
           )}
         </div>
-        <div className="mt-2 text-sm text-green-700">
-          <p><strong>File:</strong> {submissionData.submission_file_name}</p>
+        <div className="mt-3 text-xs md:text-sm text-green-700 space-y-1">
+          <p><strong>File:</strong> <span className="break-all">{submissionData.submission_file_name}</span></p>
           <p><strong>Dikumpulkan pada:</strong> {new Date(submissionData.submitted_at).toLocaleString('id-ID')}</p>
           <a 
             href={submissionData.submission_file_url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center mt-2 text-blue-600 hover:text-blue-800 underline"
+            className="inline-flex items-center mt-2 text-blue-600 hover:text-blue-800 underline text-xs md:text-sm break-all"
           >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
             </svg>
             Lihat File yang Dikumpulkan
@@ -400,37 +400,40 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
 
   if (isDeadlinePassed()) {
     return (
-      <div className="mt-4 p-4 rounded-lg border-2 border-red-500 bg-red-50">
-        <div className="flex items-center space-x-2">
-          <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mt-4 p-3 md:p-4 rounded-lg border-2 border-red-500 bg-red-50">
+        <div className="flex items-start space-x-2">
+          <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span className="font-semibold text-red-800">Deadline Telah Berakhir</span>
+          <div>
+            <span className="font-semibold text-red-800 text-sm md:text-base">Deadline Telah Berakhir</span>
+            <p className="mt-1 text-xs md:text-sm text-red-700">
+              Anda tidak dapat lagi mengumpulkan tugas ini karena deadline telah berakhir.
+            </p>
+          </div>
         </div>
-        <p className="mt-2 text-sm text-red-700">
-          Anda tidak dapat lagi mengumpulkan tugas ini karena deadline telah berakhir.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="mt-4 p-4 rounded-lg border-2 border-amber-500 bg-amber-50">
-      <h4 className="font-semibold text-amber-800 mb-3">Kumpulkan Tugas</h4>
-      <p className="text-sm text-amber-700 mb-4">
+    <div className="mt-4 p-3 md:p-4 rounded-lg border-2 border-amber-500 bg-amber-50">
+      <h4 className="font-semibold text-amber-800 mb-3 text-sm md:text-base">Kumpulkan Tugas</h4>
+      <p className="text-xs md:text-sm text-amber-700 mb-4">
         Upload file tugas Anda dalam format gambar (JPG, PNG) atau PDF. Maksimal ukuran file 2MB.
       </p>
 
       {/* Draft Status Banner */}
       {hasDraft && (
         <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-400 rounded-r-lg">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-start space-x-2">
+            <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
             </svg>
-            <div className="text-sm text-green-800">
-              <span className="font-medium">File Tersimpan: </span> {uploadedFile?.name}
-              <span className="block text-green-600">Status: Unsubmitted - File dapat diganti atau disubmit sebagai tugas final.</span>
+            <div className="text-xs md:text-sm text-green-800">
+              <span className="font-medium">File Tersimpan: </span> 
+              <span className="break-all">{uploadedFile?.name}</span>
+              <span className="block text-green-600 mt-1">Status: Unsubmitted - File dapat diganti atau disubmit sebagai tugas final.</span>
             </div>
           </div>
         </div>
@@ -444,24 +447,24 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
             accept="image/*,.pdf"
             onChange={handleFileUpload}
             disabled={isUploading}
-            className="block w-full text-sm text-amber-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-800 file:text-white hover:file:bg-amber-700 disabled:opacity-50"
+            className="block w-full text-xs md:text-sm text-amber-700 file:mr-2 md:file:mr-4 file:py-2 file:px-3 md:file:px-4 file:rounded-full file:border-0 file:text-xs md:file:text-sm file:font-semibold file:bg-amber-800 file:text-white hover:file:bg-amber-700 disabled:opacity-50"
           />
           
           {isUploading && (
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-800"></div>
-              <span className="text-sm text-amber-700">Mengupload file...</span>
+              <span className="text-xs md:text-sm text-amber-700">Mengupload file...</span>
             </div>
           )}
 
           {/* Show message when no file uploaded */}
           {!isUploading && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start space-x-2">
+                <svg className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.232 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
                 </svg>
-                <span className="text-sm text-yellow-800">Pilih file terlebih dahulu sebelum dapat mengumpulkan tugas.</span>
+                <span className="text-xs md:text-sm text-yellow-800">Pilih file terlebih dahulu sebelum dapat mengumpulkan tugas.</span>
               </div>
             </div>
           )}
@@ -471,17 +474,17 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
       {/* File Preview Section */}
       {uploadedFile && (
         <div className="space-y-4">
-          <div className="p-4 bg-white rounded-lg border-2 border-amber-300">
-            <div className="flex items-center justify-between mb-2">
-              <h5 className="font-semibold text-amber-800">Preview File</h5>
+          <div className="p-3 md:p-4 bg-white rounded-lg border-2 border-amber-300">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+              <h5 className="font-semibold text-amber-800 text-sm md:text-base">Preview File</h5>
               {submissionData && !submissionData.is_submitted && (
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full w-fit">
                   draft
                 </span>
               )}
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+              <div className="flex-shrink-0 self-center sm:self-auto">
                 {uploadedFile.type.startsWith('image/') ? (
                   <Image
                     src={uploadedFile.url}
@@ -498,18 +501,18 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{uploadedFile.name}</p>
-                <p className="text-sm text-gray-500">
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <p className="text-xs md:text-sm font-medium text-gray-900 break-all">{uploadedFile.name}</p>
+                <p className="text-xs md:text-sm text-gray-500">
                   {uploadedFile.type.startsWith('image/') ? 'Gambar' : 'PDF'}
                 </p>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                 <a
                   href={uploadedFile.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                  className="px-3 py-2 bg-blue-500 text-white text-xs md:text-sm rounded hover:bg-blue-600 text-center"
                 >
                   Lihat
                 </a>
@@ -527,7 +530,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
                       setHasClickedSubmit(false);
                       setHasClickedUnsubmit(false);
                     }}
-                    className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
+                    className="px-3 py-2 bg-gray-500 text-white text-xs md:text-sm rounded hover:bg-gray-600"
                   >
                     Ganti
                   </button>
@@ -537,7 +540,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
           </div>
 
           {/* Submit Actions */}
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
             {!submissionData || !submissionData.is_submitted ? (
               <div className="flex-1">
                 <button
@@ -546,7 +549,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
                     submitTask();
                   }}
                   disabled={isSubmitting || hasClickedSubmit || isUploading || !uploadedFile || (submissionData?.is_submitted)}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
+                  className="w-full px-4 py-3 md:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 text-sm md:text-base"
                 >
                   {isUploading ? (
                     <div className="flex items-center justify-center space-x-2">
@@ -570,7 +573,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
                 
                 {/* Show helper text when button is disabled */}
                 {(isUploading || !uploadedFile) && (
-                  <p className="text-xs text-gray-500 mt-1 text-center">
+                  <p className="text-xs text-gray-500 mt-2 text-center">
                     {isUploading ? 'Tunggu upload selesai...' : 'Upload file terlebih dahulu'}
                   </p>
                 )}
@@ -579,7 +582,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
               <button
                 onClick={unsubmitTask}
                 disabled={isSubmitting || hasClickedUnsubmit}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 font-medium"
+                className="flex-1 px-4 py-3 md:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 font-medium text-sm md:text-base"
               >
                 {isSubmitting ? 'Processing...' : hasClickedUnsubmit ? 'Sedang Diproses...' : 'Batalkan Pengumpulan'}
               </button>
@@ -590,14 +593,16 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
           {submissionData && !submissionData.is_submitted && (
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-start space-x-2">
-                <svg className="w-4 h-4 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <div className="text-sm text-green-800">
+                <div className="text-xs md:text-sm text-green-800">
                   <p className="font-medium">Unsubmitted</p>
-                  <p className="text-green-600">• File aman tersimpan dan tidak akan hilang saat refresh</p>
-                  <p className="text-green-600">• Anda masih bisa mengganti file sebelum submit final</p>
-                  <p className="text-green-600">• Klik &quot;Kumpulkan Tugas&quot; untuk mengubah status menjadi &quot;Submitted&quot;</p>
+                  <div className="text-green-600 space-y-1 mt-1">
+                    <p>• File aman tersimpan dan tidak akan hilang saat refresh</p>
+                    <p>• Anda masih bisa mengganti file sebelum submit final</p>
+                    <p>• Klik &quot;Kumpulkan Tugas&quot; untuk mengubah status menjadi &quot;Submitted&quot;</p>
+                  </div>
                 </div>
               </div>
             </div>

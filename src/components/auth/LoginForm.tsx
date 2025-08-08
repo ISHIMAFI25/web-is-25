@@ -121,9 +121,9 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   };
 
   return (
-    <div className="w-full max-w-lg p-8 space-y-6 bg-white rounded-lg shadow-md border border-gray-200">
-      <h2 className="text-3xl font-bold text-center text-gray-900">Login Peserta</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="w-full max-w-lg p-4 md:p-8 space-y-4 md:space-y-6 bg-white rounded-lg shadow-md border border-gray-200">
+      <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Login Peserta</h2>
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
         <div>
           <label htmlFor="username" className="block text-sm font-medium text-gray-700 text-left">
             Username
@@ -137,6 +137,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-gray-400 text-gray-900"
+            style={{ fontFamily: 'var(--font-roboto), sans-serif' }}
             placeholder="masukkan username Anda"
           />
         </div>
@@ -154,6 +155,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-gray-400 text-gray-900 pr-10"
+              style={{ fontFamily: 'var(--font-roboto), sans-serif' }}
               placeholder="masukkan password Anda"
             />
             <button
