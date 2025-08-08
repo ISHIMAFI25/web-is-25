@@ -9,14 +9,31 @@ export async function POST(request: Request) {
       studentName,
       taskId,
       taskDay,
+      submissionType,
       submissionFileUrl,
       submissionFileName,
       submissionFileType,
+      submissionLink,
     } = await request.json();
 
-    if (!studentEmail || !studentName || !taskId || taskDay === undefined || taskDay === null || !submissionFileUrl || !submissionFileName) {
+    if (!studentEmail || !studentName || !taskId || taskDay === undefined || taskDay === null) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Required fields missing' },
+        { status: 400 }
+      );
+    }
+
+    // Validate submission type and content
+    if (submissionType === 'file' && (!submissionFileUrl || !submissionFileName)) {
+      return NextResponse.json(
+        { error: 'File URL and name are required for file submissions' },
+        { status: 400 }
+      );
+    }
+
+    if (submissionType === 'link' && !submissionLink) {
+      return NextResponse.json(
+        { error: 'Submission link is required for link submissions' },
         { status: 400 }
       );
     }
@@ -31,36 +48,47 @@ export async function POST(request: Request) {
 
     let data, error;
 
+    const updateData: any = {
+      submission_type: submissionType,
+      is_submitted: false,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (submissionType === 'file') {
+      updateData.submission_file_url = submissionFileUrl;
+      updateData.submission_file_name = submissionFileName;
+      updateData.submission_file_type = submissionFileType;
+      updateData.submission_link = null; // Clear link if switching to file
+    } else if (submissionType === 'link') {
+      updateData.submission_link = submissionLink;
+      updateData.submission_file_url = null; // Clear file data if switching to link
+      updateData.submission_file_name = null;
+      updateData.submission_file_type = null;
+    }
+
     if (existingSubmission) {
       // Update existing submission as draft
       ({ data, error } = await supabase
         .from('task_submissions')
-        .update({
-          submission_file_url: submissionFileUrl,
-          submission_file_name: submissionFileName,
-          submission_file_type: submissionFileType,
-          is_submitted: false,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', existingSubmission.id)
         .select()
         .single());
     } else {
       // Insert new draft submission
+      const insertData = {
+        student_email: studentEmail,
+        student_name: studentName,
+        task_id: taskId,
+        task_day: taskDay,
+        submission_status: 'draft',
+        ...updateData,
+        created_at: new Date().toISOString(),
+      };
+
       ({ data, error } = await supabase
         .from('task_submissions')
-        .insert([
-          {
-            student_email: studentEmail,
-            student_name: studentName,
-            task_id: taskId,
-            task_day: taskDay,
-            submission_file_url: submissionFileUrl,
-            submission_file_name: submissionFileName,
-            submission_file_type: submissionFileType,
-            is_submitted: false,
-          },
-        ])
+        .insert([insertData])
         .select()
         .single());
     }
@@ -79,6 +107,8 @@ export async function POST(request: Request) {
         id: data.id,
         submission_file_url: data.submission_file_url,
         submission_file_name: data.submission_file_name,
+        submission_link: data.submission_link,
+        submission_type: data.submission_type,
         submitted_at: data.submitted_at,
         is_submitted: data.is_submitted,
       },
