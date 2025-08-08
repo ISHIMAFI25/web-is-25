@@ -34,7 +34,7 @@ const UserList = forwardRef<UserListRef, UserListProps>(({ className = '' }, ref
       } else {
         setError(result.error || 'Gagal memuat data user');
       }
-    } catch (err) {
+    } catch {
       setError('Terjadi kesalahan saat memuat data user');
     } finally {
       setLoading(false);

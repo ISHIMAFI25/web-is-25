@@ -1,7 +1,7 @@
 // src/lib/auth-context.tsx
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { useRouter } from 'next/navigation';
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const router = useRouter();
 
   // Fungsi untuk memeriksa apakah user adalah admin
-  const checkAdminStatus = () => {
+  const checkAdminStatus = useCallback(() => {
     if (typeof window !== 'undefined') {
       const adminCookie = document.cookie
         .split('; ')
@@ -54,14 +54,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return adminCookie;
     }
     return false;
-  };
+  }, []);
 
   // Fungsi untuk memeriksa session yang valid
-  const checkSession = async (): Promise<boolean> => {
+  const checkSession = useCallback(async (): Promise<boolean> => {
     try {
+      // Pastikan Supabase client tersedia
+      if (!supabase) {
+        console.error('Supabase client not available');
+        return false;
+      }
+
       const { data: { session }, error } = await supabase.auth.getSession();
       
-      if (error || !session) {
+      if (error) {
+        console.error('Session check error:', error);
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
+        // Clear cookies jika session tidak valid
+        if (typeof window !== 'undefined') {
+          document.cookie = "is-admin=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        }
+        return false;
+      }
+
+      if (!session) {
         setSession(null);
         setUser(null);
         setIsAdmin(false);
@@ -78,16 +96,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return true;
     } catch (error) {
       console.error('Error checking session:', error);
+      // Reset state on error
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
       return false;
     }
-  };
+  }, [checkAdminStatus]);
 
   useEffect(() => {
+    let mounted = true;
+    
     // Get initial session
     const initializeAuth = async () => {
+      if (!mounted) return;
       setLoading(true);
       await checkSession();
-      setLoading(false);
+      if (mounted) {
+        setLoading(false);
+      }
     };
 
     initializeAuth();
@@ -95,6 +122,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (event === 'SIGNED_OUT' || !session) {
@@ -114,21 +143,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // Set up session monitoring interval
-    const sessionCheckInterval = setInterval(async () => {
-      if (!loading) {
-        const isValid = await checkSession();
-        if (!isValid && window.location.pathname !== '/login') {
-          router.push('/login');
+    // Set up session monitoring interval (only in browser)
+    let sessionCheckInterval: NodeJS.Timeout | null = null;
+    
+    if (typeof window !== 'undefined') {
+      sessionCheckInterval = setInterval(async () => {
+        if (!loading && mounted) {
+          try {
+            const isValid = await checkSession();
+            if (!isValid && window.location.pathname !== '/login') {
+              router.push('/login');
+            }
+          } catch (error) {
+            console.error('Session check error:', error);
+          }
         }
-      }
-    }, 60000); // Check every minute
+      }, 60000); // Check every minute
+    }
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
-      clearInterval(sessionCheckInterval);
+      if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+      }
     };
-  }, []);
+  }, []); // Remove dependencies to avoid infinite loops
 
   const signOut = async () => {
     try {

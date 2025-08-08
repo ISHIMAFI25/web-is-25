@@ -36,7 +36,7 @@ export default function AdminUserRegistrationForm({ onUserCreated }: AdminUserRe
       } else {
         setMessage({ type: 'error', text: result.error || 'Gagal membuat user' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Terjadi kesalahan saat membuat user' });
     } finally {
       setLoading(false);

@@ -8,7 +8,7 @@ import { Compass, ScrollText, Database, Play } from "lucide-react";
 
 interface QueryResult {
   success: boolean;
-  data?: any[];
+  data?: Record<string, unknown>[];
   columns?: string[];
   error?: string;
   rowCount?: number;
@@ -211,7 +211,7 @@ export default function SQLEditorPage() {
                         <tbody>
                           {result.data.map((row, rowIndex) => (
                             <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-amber-50" : "bg-white"}>
-                              {Object.values(row).map((value: any, colIndex) => (
+                              {Object.values(row).map((value: unknown, colIndex) => (
                                 <td key={colIndex} className="border border-amber-800 px-2 py-1 text-sm" style={{ color: "#603017" }}>
                                   {value !== null ? String(value) : 'NULL'}
                                 </td>

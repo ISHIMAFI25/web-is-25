@@ -58,7 +58,7 @@ export async function createUser({ username, password, namaLengkap }: CreateUser
       console.log('User created successfully:', data.user);
       console.log('User data saved to database');
       
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.error('Database insert error:', dbError);
       
       // Jika gagal simpan ke database, hapus user dari Supabase Auth untuk konsistensi
@@ -74,7 +74,7 @@ export async function createUser({ username, password, namaLengkap }: CreateUser
 
     return { success: true, user: data.user };
 
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Server action error:', e);
     return { error: 'Terjadi kesalahan internal pada server.' };
   }
@@ -85,7 +85,7 @@ export async function getAllUsers() {
   try {
     const allUsers = await db.select().from(users);
     return { success: true, users: allUsers };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get users error:', error);
     return { error: 'Gagal mengambil data user' };
   }
@@ -96,7 +96,7 @@ export async function getUserByUsername(username: string) {
   try {
     const user = await db.select().from(users).where(eq(users.username, username));
     return { success: true, user: user[0] || null };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get user by username error:', error);
     return { error: 'Gagal mengambil data user' };
   }
@@ -146,7 +146,7 @@ export async function updateUserPassword(userEmail: string, currentPassword: str
 
     return { success: true };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update password error:', error);
     return { error: 'Terjadi kesalahan sistem' };
   }

@@ -13,7 +13,10 @@ import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff } from 'lucide-react';
 
 // Definisi interface untuk props komponen LoginForm
-interface LoginFormProps { }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface LoginFormProps {
+  // Interface kosong untuk props yang mungkin akan ditambahkan di masa depan
+}
 
 const LoginForm: React.FC<LoginFormProps> = () => {
   const [username, setUsername] = useState<string>(''); // Ganti dari email menjadi username
@@ -108,7 +111,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
           setIsError(true);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       setMessage('Terjadi kesalahan sistem. Silakan coba lagi.');
       setIsError(true);

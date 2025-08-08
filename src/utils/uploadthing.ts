@@ -1,22 +1,22 @@
 // src/utils/uploadthing.ts
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UTApi } from "uploadthing/server";
-// Nama yang benar adalah UploadThingError, bukan UploadthingError
-import { UploadThingError } from "uploadthing/server";
+// UTApi and UploadThingError are imported for future use
+// import { UTApi } from "uploadthing/server";
+// import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
 // FileRouter untuk aplikasi Anda
 export const ourFileRouter = {
   imageUploader: f({ image: { maxFileSize: "4MB" } })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ file }) => {
       console.log("Upload selesai untuk:", file.url);
     }),
   taskUploader: f({ 
     image: { maxFileSize: "2MB" },
     pdf: { maxFileSize: "2MB" }
   })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ file }) => {
       console.log("Task upload selesai untuk:", file.url);
     }),
 } satisfies FileRouter;

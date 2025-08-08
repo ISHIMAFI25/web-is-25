@@ -67,13 +67,19 @@ export async function POST(request: Request) {
       
       if (data && !error) {
         // Process count and group by manually
-        const grouped = data.reduce((acc: any, row: any) => {
+        interface GroupedRow {
+          task_id: string;
+          task_day: number;
+          is_submitted: boolean;
+          count: number;
+        }
+        const grouped = data.reduce((acc: Record<string, GroupedRow>, row: Record<string, unknown>) => {
           const key = `${row.task_id}-${row.task_day}-${row.is_submitted}`;
           if (!acc[key]) {
             acc[key] = { 
-              task_id: row.task_id, 
-              task_day: row.task_day, 
-              is_submitted: row.is_submitted,
+              task_id: row.task_id as string, 
+              task_day: row.task_day as number, 
+              is_submitted: row.is_submitted as boolean,
               count: 0 
             };
           }
@@ -96,10 +102,19 @@ export async function POST(request: Request) {
       
       if (data && !error) {
         // Process count and group by manually
-        const grouped = data.reduce((acc: any, row: any) => {
+        interface GroupedSubmission {
+          task_id: string;
+          task_day: number;
+          submission_count: number;
+        }
+        const grouped = data.reduce((acc: Record<string, GroupedSubmission>, row: Record<string, unknown>) => {
           const key = `${row.task_id}-${row.task_day}`;
           if (!acc[key]) {
-            acc[key] = { task_id: row.task_id, task_day: row.task_day, submission_count: 0 };
+            acc[key] = { 
+              task_id: row.task_id as string, 
+              task_day: row.task_day as number, 
+              submission_count: 0 
+            };
           }
           acc[key].submission_count++;
           return acc;
