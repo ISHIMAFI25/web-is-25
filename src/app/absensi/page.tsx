@@ -144,7 +144,7 @@ function AbsensiContent() {
           </Link>
           
           <h1 className="text-5xl font-extrabold text-center mb-2 drop-shadow-lg" style={{ color: "#603017" }}>
-            Absensi Day ke-3
+            Presensi Day Ke-X
           </h1>
           
           <div className="text-center text-lg" style={{ color: "#8B4513", fontFamily: "serif" }}>
@@ -210,7 +210,7 @@ function AbsensiContent() {
                 textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                 fontFamily: "serif"
               }}>
-                {isSubmitted ? "Absensi Berhasil!" : "Form Absensi"}
+                {isSubmitted ? "Presensi Berhasil!" : "Form Presensi"}
               </CardTitle>
             </CardHeader>
 
@@ -464,7 +464,7 @@ function AbsensiContent() {
                       ) : isSubmitted ? (
                         'Berhasil Dikirim!'
                       ) : (
-                        'Submit Absensi'
+                        'Submit presensi'
                       )}
                     </button>
                   </div>

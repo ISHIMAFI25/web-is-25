@@ -104,9 +104,9 @@ export default function Sidebar() {
                 className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition"
                 onClick={toggleSidebar}
               >
-                <UserRoundCheck size={18} className="md:w-5 md:h-5" color="#603017" />
-                <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
-                  Absensi
+                <UserRoundCheck size={20} color="#603017" />
+                <span className="font-medium" style={{ color: "#603017" }}>
+                  Presensi
                 </span>
               </Link>
             </li>
