@@ -2,7 +2,7 @@
 "use client"; // This is a Client Component because there is user interaction (search, expand)
 
 import React, { useState, useMemo } from 'react';
-import { DayGroup, Assignment } from '@/types/assignment';
+import { DayGroup } from '@/types/assignment';
 import { format } from 'date-fns'; // For date formatting
 import { id } from 'date-fns/locale'; // For date formatting in Indonesian
 import TaskSubmission from './TaskSubmission';

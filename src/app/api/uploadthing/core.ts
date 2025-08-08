@@ -15,7 +15,7 @@ const f = createUploadthing({
 
 export const ourFileRouter = {
   imageUploader: f({ image: { maxFileSize: "4MB" } })
-    .middleware(async ({ req }) => {
+    .middleware(async () => {
       // This code runs on your server before upload
       console.log("Upload middleware running");
       
@@ -33,7 +33,7 @@ export const ourFileRouter = {
     image: { maxFileSize: "2MB" },
     pdf: { maxFileSize: "2MB" }
   })
-    .middleware(async ({ req }) => {
+    .middleware(async () => {
       console.log("Task upload middleware running");
       return { uploadedBy: "student" };
     })

@@ -1,7 +1,8 @@
 // src/components/assignments/TaskSubmission.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth-context';
 import { useUploadThing } from '@/utils/uploadthing';
 
@@ -30,7 +31,8 @@ interface UploadedFile {
 const TaskSubmission: React.FC<TaskSubmissionProps> = ({ 
   taskId, 
   taskDay, 
-  taskTitle, 
+  // taskTitle is used for logging/debugging purposes but not displayed in UI
+  // taskTitle, 
   deadline,
   onSubmissionSuccess 
 }) => {
@@ -134,7 +136,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
   };
 
   // Check if user has already submitted this task
-  const checkSubmissionStatus = async () => {
+  const checkSubmissionStatus = useCallback(async () => {
     if (!user?.email) return;
 
     try {
@@ -171,7 +173,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.email, taskId]);
 
   // Submit task to database
   const submitTask = async () => {
@@ -343,7 +345,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
 
   useEffect(() => {
     checkSubmissionStatus();
-  }, [user?.email, taskId]);
+  }, [user?.email, taskId, checkSubmissionStatus]);
 
   // Check if there's a draft (uploaded but not submitted)
   const hasDraft = submissionData && !submissionData.is_submitted && uploadedFile;
@@ -481,9 +483,11 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 {uploadedFile.type.startsWith('image/') ? (
-                  <img
+                  <Image
                     src={uploadedFile.url}
                     alt="Preview"
+                    width={64}
+                    height={64}
                     className="w-16 h-16 object-cover rounded border"
                   />
                 ) : (
@@ -590,10 +594,10 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div className="text-sm text-green-800">
-                  <p className="font-medium">Unsubmitte</p>
+                  <p className="font-medium">Unsubmitted</p>
                   <p className="text-green-600">• File aman tersimpan dan tidak akan hilang saat refresh</p>
                   <p className="text-green-600">• Anda masih bisa mengganti file sebelum submit final</p>
-                  <p className="text-green-600">• Klik "Kumpulkan Tugas" untuk mengubah status menjadi "Submitted"</p>
+                  <p className="text-green-600">• Klik &quot;Kumpulkan Tugas&quot; untuk mengubah status menjadi &quot;Submitted&quot;</p>
                 </div>
               </div>
             </div>

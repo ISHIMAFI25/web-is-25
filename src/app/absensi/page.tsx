@@ -73,9 +73,10 @@ function AbsensiContent() {
       console.log('Saving absensi data:', absensiData);
       await simpanAbsensi(absensiData);
       setIsSubmitted(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error details:', err);
-      alert(`Error: ${err?.message || 'Terjadi error saat menyimpan absensi'}\nDetail: ${JSON.stringify(err)}`);
+      const errorMessage = err instanceof Error ? err.message : 'Terjadi error saat menyimpan absensi';
+      alert(`Error: ${errorMessage}\nDetail: ${JSON.stringify(err)}`);
     } finally {
       // Reset loading state setelah selesai (baik berhasil atau error)
       setIsSubmitting(false);

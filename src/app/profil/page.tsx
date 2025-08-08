@@ -96,7 +96,7 @@ function ProfilContent() {
       } else {
         setMessage({ type: 'error', text: result.error || 'Gagal mengubah password' });
       }
-    } catch (error) {
+    } catch {
       setMessage({ type: 'error', text: 'Terjadi kesalahan sistem' });
     } finally {
       setLoading(false);

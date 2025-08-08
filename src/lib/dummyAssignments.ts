@@ -1,6 +1,6 @@
 // src/lib/dummyAssignments.ts
 
-import { Assignment, DayGroup } from '@/types/assignment';
+import { DayGroup } from '@/types/assignment';
 
 // Fungsi helper untuk mendapatkan tanggal di masa lalu atau masa depan
 const getDate = (daysOffset: number, hours: number, minutes: number): string => {

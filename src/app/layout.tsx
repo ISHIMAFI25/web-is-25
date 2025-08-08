@@ -1,6 +1,6 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
-import { Inter, Cinzel, Roboto } from "next/font/google"; // Tambahkan Roboto di sini
+import { Cinzel, Roboto } from "next/font/google"; // Hapus Inter yang tidak digunakan
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
@@ -21,7 +21,8 @@ const roboto = Roboto({
 });
 
 // Mengatur font Inter sebagai fallback atau untuk elemen lain
-const inter = Inter({ subsets: ["latin"] });
+// Note: inter is prepared for future use but currently using roboto
+// const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",

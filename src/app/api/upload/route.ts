@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const path = join(process.cwd(), 'public', 'uploads', filename);
 
     // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
+    // Note: uploadsDir is prepared for future use
     await writeFile(path, buffer);
 
     // Return the URL path
