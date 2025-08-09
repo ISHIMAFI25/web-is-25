@@ -7,17 +7,31 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { ArrowLeft, Clock, MapPin, User, Calendar, Compass, ScrollText } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, User, Calendar, Compass, ScrollText, AlertTriangle } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useState, useEffect } from "react";
 import { uploadFotoToUploadThing } from '@/lib/uploadFotoToUploadThing';
-import { simpanAbsensi } from '@/lib/simpanAbsensi';
+import { useAuth } from '@/lib/auth-context';
+
+interface AttendanceSession {
+  id: number;
+  day_number: number;
+  day_title: string;
+  is_active: boolean;
+  start_time: string | null;
+  end_time: string | null;
+}
 
 function AbsensiContent() {
+  const { user } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
+  const [activeSession, setActiveSession] = useState<AttendanceSession | null>(null);
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     statusKehadiran: "",
     jam: "",
@@ -39,12 +53,74 @@ function AbsensiContent() {
     return () => clearInterval(timer);
   }, []);
 
+  // Fetch active session dan cek apakah user sudah submit
+  useEffect(() => {
+    const checkAttendanceStatus = async () => {
+      if (!user?.email) return;
+      
+      try {
+        // Get active session
+        const sessionResponse = await fetch('/api/attendance-sessions');
+        const sessionData = await sessionResponse.json();
+        
+        if (sessionResponse.ok) {
+          const activeSessions = sessionData.sessions?.filter((s: AttendanceSession) => s.is_active) || [];
+          
+          if (activeSessions.length > 0) {
+            const currentActiveSession = activeSessions[0];
+            setActiveSession(currentActiveSession);
+            
+            // Check if user already submitted for this session
+            const checkResponse = await fetch('/api/absensi/check-submission', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userEmail: user.email,
+                sessionId: currentActiveSession.id
+              }),
+            });
+            
+            const checkData = await checkResponse.json();
+            if (checkResponse.ok && checkData.hasSubmitted) {
+              setAlreadySubmitted(true);
+              setIsSubmitted(true); // Set ini agar form tidak muncul
+              if (checkData.submissionData) {
+                setSubmissionResult({
+                  status_approval: checkData.submissionData.status_approval,
+                  approval_message: checkData.submissionData.status_approval === 'Disetujui' 
+                    ? 'Presensi Anda telah disetujui'
+                    : checkData.submissionData.status_approval === 'Pending'
+                    ? 'Presensi Anda sedang menunggu persetujuan admin'
+                    : 'Presensi Anda ditolak',
+                  feedback_admin: checkData.submissionData.feedback_admin
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking attendance status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAttendanceStatus();
+  }, [user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Prevent double submission
-    if (isSubmitting) {
-      console.log('Already submitting, please wait...');
+    if (isSubmitting || alreadySubmitted || !activeSession) {
+      console.log('Cannot submit: already submitting, already submitted, or no active session');
+      return;
+    }
+    
+    if (!user?.email) {
+      alert('User tidak teridentifikasi. Silakan login ulang.');
       return;
     }
     
@@ -68,15 +144,45 @@ function AbsensiContent() {
         alasan: formData.statusKehadiran === 'Hadir' ? '' : formData.alasan,
         foto_url: fotoUrl,
         waktu: new Date().toISOString(),
+        user_email: user.email,
+        user_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email, // Legacy field
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
+        username: user.user_metadata?.username || user.user_metadata?.preferred_username || user.email?.split('@')[0] || user.email,
+        session_id: activeSession.id
       };
       
       console.log('Saving absensi data:', absensiData);
-      await simpanAbsensi(absensiData);
-      setIsSubmitted(true);
+      
+      // Submit to new API endpoint
+      const response = await fetch('/api/absensi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(absensiData),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        setIsSubmitted(true);
+        setAlreadySubmitted(true);
+        setSubmissionResult(result);
+        
+        // Show appropriate message based on status
+        if (result.status_approval === 'Disetujui') {
+          alert(`${result.message}\n${result.approval_message}`);
+        } else {
+          alert(`${result.message}\n${result.approval_message}`);
+        }
+      } else {
+        throw new Error(result.error || 'Gagal menyimpan absensi');
+      }
+      
     } catch (err: unknown) {
       console.error('Error details:', err);
       const errorMessage = err instanceof Error ? err.message : 'Terjadi error saat menyimpan absensi';
-      alert(`Error: ${errorMessage}\nDetail: ${JSON.stringify(err)}`);
+      alert(`Error: ${errorMessage}`);
     } finally {
       // Reset loading state setelah selesai (baik berhasil atau error)
       setIsSubmitting(false);
@@ -116,6 +222,112 @@ function AbsensiContent() {
     });
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen relative">
+        <Sidebar />
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+          <div className="text-lg text-amber-800">Memuat data sesi presensi...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // No active session
+  if (!activeSession) {
+    return (
+      <div className="min-h-screen relative">
+        <Sidebar />
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-2xl text-center">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-amber-800 hover:text-amber-900 transition-colors mb-6"
+            >
+              <ArrowLeft size={20} />
+              <span className="font-medium" style={{ fontFamily: "serif" }}>Kembali ke Beranda</span>
+            </Link>
+            
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-6 rounded-lg">
+              <AlertTriangle size={48} className="mx-auto mb-4" />
+              <h2 className="text-xl font-bold mb-2">Sesi Presensi Tidak Tersedia</h2>
+              <p>Tidak ada sesi presensi yang sedang aktif saat ini. Silakan hubungi admin untuk membuka sesi presensi.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Already submitted (baik yang baru submit maupun yang sudah submit sebelumnya)
+  if (alreadySubmitted) {
+    return (
+      <div className="min-h-screen relative">
+        <Sidebar />
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-2xl text-center">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-amber-800 hover:text-amber-900 transition-colors mb-6"
+            >
+              <ArrowLeft size={20} />
+              <span className="font-medium" style={{ fontFamily: "serif" }}>Kembali ke Beranda</span>
+            </Link>
+            
+            <div className="bg-green-100 border border-green-400 text-green-800 p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-2">Presensi Sudah Terkirim</h2>
+              <p className="mb-4">Anda sudah mengisi presensi untuk {activeSession.day_title}. Setiap peserta hanya bisa mengisi presensi sekali per sesi.</p>
+              
+              {/* Status Approval Information */}
+              {submissionResult && (
+                <div className={`p-4 rounded-lg border-2 mt-4 ${
+                  submissionResult.status_approval === 'Disetujui' 
+                    ? 'bg-green-100 border-green-600' 
+                    : submissionResult.status_approval === 'Pending'
+                    ? 'bg-yellow-100 border-yellow-600'
+                    : 'bg-red-100 border-red-600'
+                }`}>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    {submissionResult.status_approval === 'Disetujui' && (
+                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {submissionResult.status_approval === 'Pending' && (
+                      <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {submissionResult.status_approval === 'Ditolak' && (
+                      <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    Status Persetujuan: {submissionResult.status_approval}
+                  </h4>
+                  <p className="text-sm mb-2">
+                    {submissionResult.approval_message}
+                  </p>
+                  {submissionResult.feedback_admin && (
+                    <p className="text-sm italic mt-2">
+                      <strong>Feedback Admin:</strong> {submissionResult.feedback_admin}
+                    </p>
+                  )}
+                  {submissionResult.status_approval === 'Pending' && (
+                    <p className="text-xs mt-2 italic">
+                      💡 Admin akan meninjau presensi Anda. Status akan diupdate setelah ditinjau.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen relative">
       {/* Efek kompas di pojok */}
@@ -143,8 +355,8 @@ function AbsensiContent() {
             <span className="font-medium" style={{ fontFamily: "serif" }}>Kembali ke Beranda</span>
           </Link>
           
-          <h1 className="text-5xl font-extrabold text-center mb-2 drop-shadow-lg" style={{ color: "#603017" }}>
-            Presensi Day Ke-X
+          <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-2 drop-shadow-lg" style={{ color: "#603017" }}>
+            {activeSession.day_title}
           </h1>
           
           <div className="text-center text-lg" style={{ color: "#8B4513", fontFamily: "serif" }}>
@@ -156,6 +368,26 @@ function AbsensiContent() {
               <Clock size={18} />
               Waktu Saat Ini: {mounted ? getCurrentTime() : "--:--:--"}
             </p>
+          </div>
+          
+          {/* Session Status */}
+          <div className="mt-4 text-center">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+              Sesi Aktif
+            </span>
+          </div>
+          
+          {/* User Info Display */}
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
+              <User size={16} />
+              Mengisi presensi sebagai:
+            </h3>
+            <div className="text-sm text-blue-800 space-y-1">
+              <p><span className="font-medium">Nama:</span> {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email}</p>
+              <p><span className="font-medium">Username:</span> {user?.user_metadata?.username || user?.user_metadata?.preferred_username || user?.email?.split('@')[0] || user?.email}</p>
+              <p><span className="font-medium">Email:</span> {user?.email}</p>
+            </div>
           </div>
         </div>
 
@@ -270,6 +502,42 @@ function AbsensiContent() {
                       )}
                     </div>
                   </div>
+
+                  {/* Status Approval Information */}
+                  {submissionResult && (
+                    <div className={`p-4 rounded-lg border-2 mb-6 ${
+                      submissionResult.status_approval === 'Disetujui' 
+                        ? 'bg-green-100 border-green-600' 
+                        : submissionResult.status_approval === 'Pending'
+                        ? 'bg-yellow-100 border-yellow-600'
+                        : 'bg-red-100 border-red-600'
+                    }`}>
+                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+                        {submissionResult.status_approval === 'Disetujui' && (
+                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        {submissionResult.status_approval === 'Pending' && (
+                          <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        Status Persetujuan
+                      </h4>
+                      <p className="text-sm mb-2">
+                        <strong>Status:</strong> {submissionResult.status_approval}
+                      </p>
+                      <p className="text-sm">
+                        {submissionResult.approval_message}
+                      </p>
+                      {submissionResult.status_approval === 'Pending' && (
+                        <p className="text-xs mt-2 italic">
+                          💡 Admin akan meninjau presensi Anda. Status akan diupdate setelah ditinjau.
+                        </p>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="flex gap-4 justify-center">
                     <Link href="/">
@@ -287,6 +555,8 @@ function AbsensiContent() {
                     <button 
                       onClick={() => {
                         setIsSubmitted(false);
+                        setAlreadySubmitted(false);
+                        setSubmissionResult(null);
                         setFormData({
                           statusKehadiran: "",
                           jam: "",

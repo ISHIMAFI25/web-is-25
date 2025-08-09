@@ -4,10 +4,12 @@
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/ui/sidebar';
 import AdminUserRegistrationForm from '@/components/admin/AdminUserRegistrationForm';
+import AttendanceSessionManager from '@/components/admin/AttendanceSessionManager';
+import AttendanceDataViewer from '@/components/admin/AttendanceDataViewer';
 import TaskManager from '@/components/admin/TaskManager';
 import DayManager from '@/components/admin/DayManager';
 import { useState } from 'react';
-import { Users, FileText, Calendar, Settings } from 'lucide-react';
+import { Users, FileText, Calendar, Clock, BarChart3 } from 'lucide-react';
 
 export default function AdminPage() {
   return (
@@ -22,7 +24,7 @@ export default function AdminPage() {
 
 // Halaman Admin dengan proteksi
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'days'>('tasks');
+  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'days' | 'attendance-sessions' | 'attendance-data'>('tasks');
   
   return (
     <div 
@@ -47,10 +49,10 @@ const AdminDashboard = () => {
               
               {/* Tab Navigation */}
               <div className="mt-4 border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8">
+                <nav className="-mb-px flex space-x-8 overflow-x-auto">
                   <button
                     onClick={() => setActiveTab('tasks')}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                       activeTab === 'tasks'
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -72,7 +74,7 @@ const AdminDashboard = () => {
                   </button>
                   <button
                     onClick={() => setActiveTab('users')}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                       activeTab === 'users'
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -80,6 +82,28 @@ const AdminDashboard = () => {
                   >
                     <Users className="w-4 h-4 inline-block mr-2" />
                     Manajemen User
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('attendance-sessions')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === 'attendance-sessions'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <Clock className="w-4 h-4 inline-block mr-2" />
+                    Sesi Presensi
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('attendance-data')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === 'attendance-data'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4 inline-block mr-2" />
+                    Data Presensi
                   </button>
                 </nav>
               </div>
@@ -96,6 +120,18 @@ const AdminDashboard = () => {
             {activeTab === 'days' && (
               <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5 p-4 md:p-6">
                 <DayManager isAdmin={true} />
+              </div>
+            )}
+            
+            {activeTab === 'attendance-sessions' && (
+              <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5 p-4 md:p-6">
+                <AttendanceSessionManager />
+              </div>
+            )}
+            
+            {activeTab === 'attendance-data' && (
+              <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5">
+                <AttendanceDataViewer />
               </div>
             )}
             
