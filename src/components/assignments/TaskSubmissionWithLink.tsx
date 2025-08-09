@@ -290,8 +290,8 @@ const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({
 
   // Unsubmit task
   const handleUnsubmit = async () => {
-    if (!user?.email) {
-      showNotification('❌ User tidak ditemukan', 'error');
+    if (!submissionData?.id) {
+      showNotification('❌ Submission ID tidak ditemukan', 'error');
       return;
     }
 
@@ -304,17 +304,16 @@ const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          studentEmail: user.email,
-          taskId: taskId,
-          taskDay: taskDay,
+          submissionId: submissionData.id,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setSubmissionData({...data.submission, is_submitted: false});
+        // Update state to mark as unsubmitted, keep other data intact
+        setSubmissionData({...submissionData, is_submitted: false});
         showNotification('✅ Pengumpulan tugas dibatalkan', 'success');
-        onSubmissionSuccess();
+        // Note: Don't call onSubmissionSuccess here as we're unsubmitting, not submitting
       } else {
         const errorData = await response.json();
         showNotification(`❌ Gagal membatalkan pengumpulan: ${errorData.error}`, 'error');

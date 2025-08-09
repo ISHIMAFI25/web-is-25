@@ -23,15 +23,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // Default to 'file' if submissionType is not provided (backward compatibility)
+    const finalSubmissionType = submissionType || 'file';
+
     // Validate submission type and content
-    if (submissionType === 'file' && (!submissionFileUrl || !submissionFileName)) {
+    if (finalSubmissionType === 'file' && (!submissionFileUrl || !submissionFileName)) {
       return NextResponse.json(
         { error: 'File URL and name are required for file submissions' },
         { status: 400 }
       );
     }
 
-    if (submissionType === 'link' && !submissionLink) {
+    if (finalSubmissionType === 'link' && !submissionLink) {
       return NextResponse.json(
         { error: 'Submission link is required for link submissions' },
         { status: 400 }
@@ -49,21 +52,26 @@ export async function POST(request: Request) {
     let data, error;
 
     const updateData: any = {
-      submission_type: submissionType,
+      submission_type: finalSubmissionType,
       is_submitted: false,
       updated_at: new Date().toISOString(),
     };
 
-    if (submissionType === 'file') {
+    if (finalSubmissionType === 'file') {
       updateData.submission_file_url = submissionFileUrl;
       updateData.submission_file_name = submissionFileName;
       updateData.submission_file_type = submissionFileType;
       updateData.submission_link = null; // Clear link if switching to file
-    } else if (submissionType === 'link') {
+    } else if (finalSubmissionType === 'link') {
       updateData.submission_link = submissionLink;
       updateData.submission_file_url = null; // Clear file data if switching to link
       updateData.submission_file_name = null;
       updateData.submission_file_type = null;
+    } else if (finalSubmissionType === 'both') {
+      updateData.submission_file_url = submissionFileUrl;
+      updateData.submission_file_name = submissionFileName;
+      updateData.submission_file_type = submissionFileType;
+      updateData.submission_link = submissionLink;
     }
 
     if (existingSubmission) {

@@ -37,6 +37,7 @@ export async function POST(request: Request) {
           id: data.id,
           submission_file_url: data.submission_file_url,
           submission_file_name: data.submission_file_name,
+          submission_file_type: data.submission_file_type,
           submitted_at: data.submitted_at,
           is_submitted: data.is_submitted || false,
         },

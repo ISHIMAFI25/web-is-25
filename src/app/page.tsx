@@ -13,15 +13,14 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // TEMPORARY: Comment out redirect for debugging
     // Redirect ke login jika belum login
-    // if (!loading && !user) {
-    //   // Gunakan timeout untuk menghindari konflik navigasi
-    //   const timer = setTimeout(() => {
-    //     router.push('/login');
-    //   }, 100);
-    //   return () => clearTimeout(timer);
-    // }
+    if (!loading && !user) {
+      // Gunakan timeout untuk menghindari konflik navigasi
+      const timer = setTimeout(() => {
+        router.push('/login');
+      }, 100);
+      return () => clearTimeout(timer);
+    }
   }, [user, loading, router]);
 
   // Show loading state while checking auth
@@ -37,19 +36,18 @@ export default function HomePage() {
     );
   }
 
-  // TEMPORARY: Comment out redirect condition for debugging
   // If not authenticated, show loading (will redirect)
-  // if (!user) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="text-2xl font-bold" style={{ color: "#603017" }}>
-  //           Redirecting...
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold" style={{ color: "#603017" }}>
+            Redirecting...
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen relative">

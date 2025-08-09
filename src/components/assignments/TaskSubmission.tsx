@@ -18,6 +18,7 @@ interface SubmissionData {
   id: string;
   submission_file_url: string;
   submission_file_name: string;
+  submission_file_type?: string;
   submitted_at: string;
   is_submitted: boolean;
 }
@@ -114,6 +115,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
           studentName: studentName, // Use the studentName variable
           taskId: taskId,
           taskDay: taskDay,
+          submissionType: 'file', // Add missing submission type
           submissionFileUrl: fileUrl,
           submissionFileName: fileName,
           submissionFileType: fileType,
@@ -153,7 +155,10 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
 
       if (response.ok) {
         const data = await response.json();
+        console.log('📥 Check submission response:', data);
+        
         if (data.exists) {
+          console.log('✅ Existing submission found:', data.submission);
           setSubmissionData(data.submission);
           // If there's an existing submission, also set it as uploaded file
           setUploadedFile({
@@ -255,6 +260,7 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
           studentName: studentName, // Use the studentName variable we defined above
           taskId: taskId,
           taskDay: Number(taskDay), // Ensure taskDay is a number
+          submissionType: 'file', // Add missing submission type
           submissionFileUrl: uploadedFile.url, // This is already the correct URL from ufsUrl
           submissionFileName: uploadedFile.name,
           submissionFileType: uploadedFile.type,
@@ -263,6 +269,9 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Submit successful, response data:', data);
+        console.log('✅ Setting submissionData to:', {...data.submission, is_submitted: true});
+        
         setSubmissionData({...data.submission, is_submitted: true});
         onSubmissionSuccess();
         
@@ -292,11 +301,27 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
 
   // Unsubmit task
   const unsubmitTask = async () => {
-    if (!submissionData?.id || hasClickedUnsubmit) return;
+    console.log('🔄 unsubmitTask called');
+    console.log('📊 submissionData:', submissionData);
+    console.log('📝 submissionData.id:', submissionData?.id);
+    console.log('🎯 hasClickedUnsubmit:', hasClickedUnsubmit);
+    
+    if (!submissionData?.id || hasClickedUnsubmit) {
+      console.log('❌ unsubmitTask blocked:', {
+        hasId: !!submissionData?.id,
+        hasClickedUnsubmit: hasClickedUnsubmit
+      });
+      return;
+    }
 
     setHasClickedUnsubmit(true);
     setIsSubmitting(true);
     try {
+      console.log('📤 Sending unsubmit request with ID:', submissionData.id);
+      console.log('📤 Request body will be:', JSON.stringify({
+        submissionId: submissionData.id,
+      }));
+      
       const response = await fetch('/api/unsubmit-task', {
         method: 'POST',
         headers: {
@@ -316,8 +341,11 @@ const TaskSubmission: React.FC<TaskSubmissionProps> = ({
         
       } else {
         const errorData = await response.json();
+        console.error('❌ Unsubmit failed:', errorData);
+        console.error('❌ Response status:', response.status);
+        console.error('❌ Response headers:', response.headers);
         
-        showNotification(`❌ Error: ${errorData.error}`, 'error');
+        showNotification(`❌ Gagal membatalkan pengumpulan: ${errorData.error}`, 'error');
         
         // Reset click state on error so user can try again
         setHasClickedUnsubmit(false);

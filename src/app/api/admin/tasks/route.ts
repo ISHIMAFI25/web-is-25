@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     
     // Get all tasks grouped by day
     const { data: tasks, error } = await supabase
-      .from('assignments')
+      .from('assignment_list')
       .select('*')
       .order('day', { ascending: true })
       .order('created_at', { ascending: true });
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     // Insert new task
     const { data: newTask, error } = await supabase
-      .from('assignments')
+      .from('assignment_list')
       .insert([{
         id: taskId,
         title,
