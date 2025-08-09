@@ -377,9 +377,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
                   onFilesChange={handleFileUpload}
                   endpoint="instructionFilesUploader"
                   label="File Petunjuk"
-                  description="Upload file petunjuk untuk tugas ini"
+                  description="Upload file petunjuk untuk tugas ini (tanpa batasan ukuran)"
                   multiple={true}
-                  maxSizeMB={8}
                 />
               </div>
 
