@@ -11,13 +11,13 @@ export async function POST(request: NextRequest) {
     console.log('Initializing dummy data...');
     
     // Clear existing assignments first (optional - remove if you want to keep existing data)
-    // await supabase.from('assignments').delete().gte('id', '');
+    // await supabase.from('assignment_list').delete().gte('id', '');
     
     // Insert dummy assignments
     for (const dayGroup of dummyAssignments) {
       for (const assignment of dayGroup.assignments) {
         const { data, error } = await supabase
-          .from('assignments')
+          .from('assignment_list')
           .upsert([{
             id: assignment.id,
             title: assignment.title,

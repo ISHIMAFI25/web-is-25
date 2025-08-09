@@ -5,7 +5,6 @@ import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Ca
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
-import DaysSidebar from "@/components/DaysSidebar";
 
 export default function Sidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -125,10 +124,6 @@ export default function Sidebar() {
               </Link>
             </li>
             
-            {/* Days Information */}
-            <li className="mb-4">
-              <DaysSidebar isAdmin={isAdmin} />
-            </li>
             {/* Admin Menu - Hanya tampil jika user adalah admin */}
             {isAdmin && (
               <>

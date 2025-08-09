@@ -26,7 +26,7 @@ export async function PUT(
 
     // Update task
     const { data: updatedTask, error } = await supabase
-      .from('assignments')
+      .from('assignment_list')
       .update({
         title,
         day,
@@ -66,7 +66,7 @@ export async function DELETE(
 
     // Delete task
     const { error } = await supabase
-      .from('assignments')
+      .from('assignment_list')
       .delete()
       .eq('id', taskId);
 

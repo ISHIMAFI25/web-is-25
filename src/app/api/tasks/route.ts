@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get all tasks grouped by day
     const { data: tasks, error } = await supabase
-      .from('assignments')
+      .from('assignment_list')
       .select('*')
       .order('day', { ascending: true })
       .order('created_at', { ascending: true });

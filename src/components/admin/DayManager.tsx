@@ -160,22 +160,41 @@ const DayManager: React.FC<DayManagerProps> = ({ isAdmin }) => {
   };
 
   const handleDeleteDay = async (dayId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus informasi day ini?')) return;
+    console.log('🗑️ Delete day clicked for ID:', dayId);
+    
+    if (!confirm('Apakah Anda yakin ingin menghapus informasi day ini?')) {
+      console.log('❌ Delete cancelled by user');
+      return;
+    }
+
+    console.log('✅ Delete confirmed, proceeding...');
 
     try {
+      console.log('📤 Sending DELETE request to:', `/api/admin/days/${dayId}`);
+      
       const response = await fetch(`/api/admin/days/${dayId}`, {
         method: 'DELETE'
       });
 
+      console.log('📥 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('✅ Delete successful, response:', responseData);
+        
         showNotification('Informasi day berhasil dihapus!');
         loadDays();
       } else {
         const errorData = await response.json();
+        console.error('❌ Delete failed with error data:', errorData);
         throw new Error(errorData.error || 'Failed to delete day');
       }
     } catch (error) {
-      console.error('Delete error:', error);
+      console.error('❌ Delete error:', error);
       showNotification('Gagal menghapus informasi day', 'error');
     }
   };

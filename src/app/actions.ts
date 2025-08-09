@@ -105,49 +105,53 @@ export async function getUserByUsername(username: string) {
 // Fungsi untuk mengubah password user
 export async function updateUserPassword(userEmail: string, currentPassword: string, newPassword: string) {
   try {
+    console.log('🔄 updateUserPassword called for email:', userEmail);
+    
     // Validasi password baru
     if (!newPassword || newPassword.length < 6) {
       return { error: 'Password baru harus minimal 6 karakter' };
     }
 
-    // Verify current password by attempting to sign in
-    const { error: verifyError } = await supabaseAdmin.auth.signInWithPassword({
+    // Verify current password by creating a temporary client session FIRST
+    console.log('🔐 Verifying current password...');
+    const tempClient = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      auth: { persistSession: false }
+    });
+
+    const { data: authData, error: verifyError } = await tempClient.auth.signInWithPassword({
       email: userEmail,
       password: currentPassword,
     });
 
-    if (verifyError) {
+    if (verifyError || !authData.user) {
+      console.error('❌ Password verification failed:', verifyError);
       return { error: 'Password lama tidak benar' };
     }
 
-    // Get user by email to get the user ID
-    const { data: userData, error: getUserError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (getUserError) {
-      return { error: 'Gagal mendapatkan data user' };
-    }
+    console.log('✅ Current password verified successfully');
+    console.log('👤 Authenticated user ID:', authData.user.id);
 
-    const targetUser = userData.users.find(u => u.email === userEmail);
-    
-    if (!targetUser) {
-      return { error: 'User tidak ditemukan' };
-    }
-
-    // Update password
+    // Now use the authenticated user's ID directly to update password
+    console.log('🔄 Updating password for user ID:', authData.user.id);
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      targetUser.id,
+      authData.user.id,
       { password: newPassword }
     );
 
     if (updateError) {
-      console.error('Update password error:', updateError);
+      console.error('❌ Update password error:', updateError);
       return { error: 'Gagal mengubah password' };
     }
 
+    console.log('✅ Password updated successfully');
+    
+    // Sign out the temporary session to clean up
+    await tempClient.auth.signOut();
+    
     return { success: true };
 
   } catch (error: unknown) {
-    console.error('Update password error:', error);
+    console.error('❌ Update password error:', error);
     return { error: 'Terjadi kesalahan sistem' };
   }
 }

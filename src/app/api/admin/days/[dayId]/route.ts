@@ -1,6 +1,14 @@
 // src/app/api/admin/days/[dayId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Use Supabase Admin Client for admin operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: { persistSession: false },
+});
 
 export async function PUT(
   request: NextRequest,
@@ -22,7 +30,7 @@ export async function PUT(
     } = body;
 
     // Update day
-    const { data: updatedDay, error } = await supabase
+    const { data: updatedDay, error } = await supabaseAdmin
       .from('days')
       .update({
         day_number: dayNumber,
@@ -57,20 +65,24 @@ export async function DELETE(
 ) {
   try {
     const { dayId } = await params;
+    console.log('🗑️ DELETE day request received for dayId:', dayId);
 
     // Delete day
-    const { error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('days')
       .delete()
-      .eq('id', dayId);
+      .eq('id', dayId)
+      .select();
 
     if (error) {
+      console.error('❌ Supabase delete error:', error);
       throw error;
     }
 
-    return NextResponse.json({ success: true });
+    console.log('✅ Day deletion successful:', data);
+    return NextResponse.json({ success: true, deletedData: data });
   } catch (error) {
-    console.error('Error deleting day:', error);
+    console.error('❌ Error deleting day:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
