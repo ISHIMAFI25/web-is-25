@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
           description: task.description,
           attachmentUrl: task.attachment_url,
           instructionFiles: task.instruction_files || [],
+          instructionLinks: task.instruction_links || [],
           acceptsLinks: task.accepts_links,
           acceptsFiles: task.accepts_files,
           maxFileSize: task.max_file_size,
@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
             description: task.description,
             attachmentUrl: task.attachment_url,
             instructionFiles: task.instruction_files || [],
+            instructionLinks: task.instruction_links || [],
             acceptsLinks: task.accepts_links,
             acceptsFiles: task.accepts_files,
             maxFileSize: task.max_file_size,
@@ -77,7 +79,8 @@ export async function POST(request: NextRequest) {
       acceptsLinks,
       acceptsFiles,
       maxFileSize,
-      instructionFiles
+      instructionFiles,
+      instructionLinks
     } = body;
 
     // Generate unique task ID
@@ -93,6 +96,7 @@ export async function POST(request: NextRequest) {
         deadline,
         description,
         instruction_files: instructionFiles,
+        instruction_links: instructionLinks || [],
         accepts_links: acceptsLinks,
         accepts_files: acceptsFiles,
         max_file_size: maxFileSize,

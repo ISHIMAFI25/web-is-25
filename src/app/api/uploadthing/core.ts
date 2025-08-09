@@ -42,6 +42,56 @@ export const ourFileRouter = {
       console.log("Task file url:", file.ufsUrl || file.url); // Use ufsUrl with fallback
       return { uploadedBy: metadata.uploadedBy };
     }),
+  dayFilesUploader: f({ 
+    image: { maxFileSize: "8MB" },
+    pdf: { maxFileSize: "8MB" },
+    video: { maxFileSize: "32MB" },
+    audio: { maxFileSize: "8MB" },
+    text: { maxFileSize: "4MB" },
+    blob: { maxFileSize: "16MB" }
+  })
+    .middleware(async () => {
+      console.log("Day files upload middleware running");
+      return { uploadedBy: "admin", fileType: "day_attachment" };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Day files upload complete for:", metadata.uploadedBy);
+      console.log("Day file url:", file.ufsUrl || file.url);
+      console.log("Day file name:", file.name);
+      console.log("Day file size:", file.size);
+      return { 
+        uploadedBy: metadata.uploadedBy, 
+        fileType: metadata.fileType,
+        url: file.ufsUrl || file.url,
+        name: file.name,
+        size: file.size
+      };
+    }),
+  instructionFilesUploader: f({ 
+    image: { maxFileSize: "8MB" },
+    pdf: { maxFileSize: "8MB" },
+    video: { maxFileSize: "32MB" },
+    audio: { maxFileSize: "8MB" },
+    text: { maxFileSize: "4MB" },
+    blob: { maxFileSize: "16MB" }
+  })
+    .middleware(async () => {
+      console.log("Instruction files upload middleware running");
+      return { uploadedBy: "admin", fileType: "instruction_file" };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Instruction files upload complete for:", metadata.uploadedBy);
+      console.log("Instruction file url:", file.ufsUrl || file.url);
+      console.log("Instruction file name:", file.name);
+      console.log("Instruction file size:", file.size);
+      return { 
+        uploadedBy: metadata.uploadedBy, 
+        fileType: metadata.fileType,
+        url: file.ufsUrl || file.url,
+        name: file.name,
+        size: file.size
+      };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
