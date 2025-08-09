@@ -1,11 +1,19 @@
 // src/app/api/admin/days/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Use Supabase Admin Client for admin operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: { persistSession: false },
+});
 
 export async function GET(request: NextRequest) {
   try {
     // Get all days ordered by day_number
-    const { data: days, error } = await supabase
+    const { data: days, error } = await supabaseAdmin
       .from('days')
       .select('*')
       .order('day_number', { ascending: true });
@@ -56,7 +64,7 @@ export async function POST(request: NextRequest) {
     const dayId = `day-${dayNumber}-${Date.now()}`;
 
     // Insert new day
-    const { data: newDay, error } = await supabase
+    const { data: newDay, error } = await supabaseAdmin
       .from('days')
       .insert([{
         id: dayId,
