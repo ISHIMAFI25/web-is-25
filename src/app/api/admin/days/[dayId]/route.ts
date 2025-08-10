@@ -12,7 +12,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { dayId: string } }
+  { params }: { params: Promise<{ dayId: string }> }
 ) {
   try {
     const { dayId } = await params;
@@ -61,7 +61,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { dayId: string } }
+  { params }: { params: Promise<{ dayId: string }> }
 ) {
   try {
     const { dayId } = await params;

@@ -4,13 +4,13 @@ import { supabase } from '@/lib/supabase';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
     // Temporarily bypass auth for development
     // TODO: Implement proper authentication in production
 
-    const { taskId } = params;
+    const { taskId } = await params;
     const body = await request.json();
     const {
       title,
@@ -56,13 +56,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
     // Temporarily bypass auth for development
     // TODO: Implement proper authentication in production
 
-    const { taskId } = params;
+    const { taskId } = await params;
 
     // Delete task
     const { error } = await supabase
