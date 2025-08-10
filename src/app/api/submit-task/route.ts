@@ -51,7 +51,17 @@ export async function POST(request: Request) {
 
     let data, error;
 
-    const updateData: any = {
+    const updateData: {
+      submission_type: string;
+      is_submitted: boolean;
+      submitted_at: string;
+      updated_at: string;
+      submission_status: string;
+      submission_file_url?: string | null;
+      submission_file_name?: string | null;
+      submission_file_type?: string | null;
+      submission_link?: string | null;
+    } = {
       submission_type: finalSubmissionType,
       is_submitted: true,
       submitted_at: new Date().toISOString(),

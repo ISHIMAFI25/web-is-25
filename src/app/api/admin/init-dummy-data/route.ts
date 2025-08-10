@@ -1,9 +1,9 @@
 // src/app/api/admin/init-dummy-data/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import dummyAssignments from '@/lib/dummyAssignments';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Temporarily bypass auth for development
     // TODO: Implement proper authentication in production
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Insert dummy assignments
     for (const dayGroup of dummyAssignments) {
       for (const assignment of dayGroup.assignments) {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('assignment_list')
           .upsert([{
             id: assignment.id,

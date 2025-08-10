@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 interface AttendanceRecord {
@@ -27,7 +27,6 @@ interface AttendanceSession {
 }
 
 export default function AttendanceDataViewer() {
-  const { user } = useAuth();
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<number | null>(null);
@@ -49,7 +48,7 @@ export default function AttendanceDataViewer() {
     setTimeout(() => setMessage(null), 5000);
   };
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       const response = await fetch('/api/attendance-sessions');
       const data = await response.json();
@@ -69,9 +68,9 @@ export default function AttendanceDataViewer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAttendanceData = async () => {
+  const fetchAttendanceData = useCallback(async () => {
     if (!selectedSession) return;
     
     setLoading(true);
@@ -90,7 +89,17 @@ export default function AttendanceDataViewer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSession]);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+
+  useEffect(() => {
+    if (selectedSession) {
+      fetchAttendanceData();
+    }
+  }, [selectedSession, fetchAttendanceData]);
 
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString('id-ID', {

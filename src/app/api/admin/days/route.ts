@@ -10,7 +10,23 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: { persistSession: false },
 });
 
-export async function GET(request: NextRequest) {
+// Interface untuk data day dari database
+interface DayData {
+  id: string;
+  day_number: number;
+  title: string;
+  description: string | null;
+  date_time: string | null;
+  location: string | null;
+  specifications: string | null;
+  attachment_files: Array<{ url: string; name: string; size?: number }>;
+  attachment_links: Array<{ url: string; title: string; description?: string }>;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function GET() {
   try {
     // Get all days ordered by day_number
     const { data: days, error } = await supabaseAdmin
@@ -23,7 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data to match frontend types
-    const transformedDays = days.map((day: any) => ({
+    const transformedDays = (days as DayData[]).map((day) => ({
       id: day.id,
       dayNumber: day.day_number,
       title: day.title,

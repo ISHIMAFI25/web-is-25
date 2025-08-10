@@ -1,5 +1,19 @@
 import { pgTable, bigserial, varchar, text, timestamp, integer, boolean, jsonb } from 'drizzle-orm/pg-core';
 
+// Interface untuk attachment files
+interface AttachmentFile {
+  url: string;
+  name: string;
+  size?: number;
+}
+
+// Interface untuk attachment links  
+interface AttachmentLink {
+  url: string;
+  title: string;
+  description?: string;
+}
+
 // Tabel untuk menyimpan task submissions
 export const taskSubmissions = pgTable('task_submissions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -28,8 +42,8 @@ export const days = pgTable('days', {
   date_time: timestamp('date_time', { withTimezone: true }),
   location: text('location'),
   specifications: text('specifications'),
-  attachment_files: jsonb('attachment_files').$type<any[]>().default([]),
-  attachment_links: jsonb('attachment_links').$type<any[]>().default([]),
+  attachment_files: jsonb('attachment_files').$type<AttachmentFile[]>().default([]),
+  attachment_links: jsonb('attachment_links').$type<AttachmentLink[]>().default([]),
   is_visible: boolean('is_visible').default(true),
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow(),

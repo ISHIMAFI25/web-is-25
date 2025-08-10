@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { UserRoundCheck, Compass, ScrollText } from "lucide-react";
+import { Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import UpcomingDayInfo from "@/components/UpcomingDayInfo";
 import { useAuth } from "@/lib/auth-context";

@@ -35,7 +35,6 @@ interface UploadedFile {
 const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({ 
   taskId, 
   taskDay, 
-  taskTitle,
   deadline,
   assignment,
   onSubmissionSuccess 
@@ -44,7 +43,6 @@ const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({
   const [submissionData, setSubmissionData] = useState<SubmissionData | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [submissionLink, setSubmissionLink] = useState<string>('');
-  const [submissionType, setSubmissionType] = useState<'file' | 'link' | 'both'>('both');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -199,8 +197,6 @@ const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({
           if (data.submission.submission_link) {
             setSubmissionLink(data.submission.submission_link);
           }
-          
-          setSubmissionType('both');
         }
       }
     } catch (error) {
@@ -309,7 +305,7 @@ const TaskSubmissionWithLink: React.FC<TaskSubmissionProps> = ({
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         // Update state to mark as unsubmitted, keep other data intact
         setSubmissionData({...submissionData, is_submitted: false});
         showNotification('✅ Pengumpulan tugas dibatalkan', 'success');

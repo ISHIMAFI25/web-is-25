@@ -1,8 +1,24 @@
 // src/app/api/days/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 
-export async function GET(request: NextRequest) {
+// Interface untuk day data
+interface DayData {
+  id: string;
+  day_number: number;
+  title: string;
+  description: string | null;
+  date_time: string | null;
+  location: string | null;
+  specifications: string | null;
+  attachment_files: Array<{ url: string; name: string; size?: number }>;
+  attachment_links: Array<{ url: string; title: string; description?: string }>;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function GET() {
   try {
     console.log('Fetching visible days...');
     
@@ -21,7 +37,7 @@ export async function GET(request: NextRequest) {
     console.log('Found days:', days?.length || 0, days);
 
     // Transform data to match frontend types - keep snake_case to match DB
-    const transformedDays = days.map((day: any) => ({
+    const transformedDays = (days as DayData[]).map((day) => ({
       id: day.id,
       day_number: day.day_number,
       title: day.title,

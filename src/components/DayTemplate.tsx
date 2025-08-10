@@ -1,12 +1,26 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, MapPin, Clock, File, Eye, Compass, ScrollText, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFileIcon, getFileName } from '@/lib/uploadHelpers';
 import Sidebar from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
+
+// Interface untuk attachment files
+interface AttachmentFile {
+  url: string;
+  name: string;
+  size?: number;
+}
+
+// Interface untuk attachment links
+interface AttachmentLink {
+  url: string;
+  title: string;
+  description?: string;
+}
 
 interface Day {
   id: string;
@@ -16,8 +30,8 @@ interface Day {
   date_time: string;
   location: string;
   specifications?: string;
-  attachment_files: { name: string; url: string; size?: number }[];
-  attachment_links?: { name: string; url: string }[];
+  attachment_files: AttachmentFile[];
+  attachment_links?: AttachmentLink[];
   is_visible: boolean;
   created_at: string;
   updated_at: string;
@@ -43,7 +57,7 @@ export default function DayPage({ dayNumber }: DayPageProps) {
     }
   }, [user, loading, router, dayNumber]);
 
-  const fetchDayData = async () => {
+  const fetchDayData = useCallback(async () => {
     try {
       console.log('🔍 DayTemplate: Starting fetch for day number:', dayNumber);
       setDataLoading(true);
@@ -70,7 +84,15 @@ export default function DayPage({ dayNumber }: DayPageProps) {
     } finally {
       setDataLoading(false);
     }
-  };
+  }, [dayNumber]);
+
+  useEffect(() => {
+    if (!user && !loading) {
+      router.push('/login');
+    } else if (!loading && user) {
+      fetchDayData();
+    }
+  }, [user, loading, router, fetchDayData]);
 
   const formatDate = (dateTimeString: string) => {
     const date = new Date(dateTimeString);
@@ -278,7 +300,7 @@ export default function DayPage({ dayNumber }: DayPageProps) {
                     File Lampiran:
                   </h4>
                   <div className="space-y-2">
-                    {dayData.attachment_files.map((file: any, index: number) => {
+                    {dayData.attachment_files.map((file: AttachmentFile, index: number) => {
                       const fileName = typeof file === 'string' ? getFileName(file) : file.name;
                       const fileUrl = typeof file === 'string' ? file : file.url;
                       const fileSize = typeof file === 'object' && file.size 
@@ -320,7 +342,7 @@ export default function DayPage({ dayNumber }: DayPageProps) {
                     Link Lampiran:
                   </h4>
                   <div className="space-y-2">
-                    {dayData.attachment_links.map((link: any, index: number) => (
+                    {dayData.attachment_links.map((link: AttachmentLink, index: number) => (
                       <a
                         key={index}
                         href={link.url}
@@ -333,7 +355,7 @@ export default function DayPage({ dayNumber }: DayPageProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-green-800 truncate group-hover:text-green-900">
-                            {link.name}
+                            {link.title}
                           </div>
                           <div className="text-xs text-green-600 truncate">{link.url}</div>
                         </div>

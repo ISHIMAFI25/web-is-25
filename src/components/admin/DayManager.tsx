@@ -3,10 +3,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { DayInfo, DayForm } from '@/types/day';
-import { Plus, Edit, Trash2, Save, X, FileText, Calendar, MapPin, Eye, EyeOff, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, FileText, Calendar, MapPin, Eye, EyeOff } from 'lucide-react';
 import FileUploadWidget from '@/components/upload/FileUploadWidget';
 import LinkAttachmentWidget from '@/components/upload/LinkAttachmentWidget';
-import { getFileIcon, getFileName } from '@/lib/uploadHelpers';
 
 interface DayManagerProps {
   isAdmin: boolean;
@@ -457,7 +456,7 @@ const DayManager: React.FC<DayManagerProps> = ({ isAdmin }) => {
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-600 mb-4">Belum ada informasi day yang tersedia.</p>
             <p className="text-sm text-gray-500 mb-4">
-              Klik "Tambah Day Baru" untuk membuat informasi day pertama.
+              Klik &quot;Tambah Day Baru&quot; untuk membuat informasi day pertama.
             </p>
           </div>
         ) : (

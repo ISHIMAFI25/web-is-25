@@ -22,7 +22,7 @@ export default function LoginPage() {
         <ScrollText size={48} className="text-amber-900 md:w-24 md:h-24" />
       </div>
 
-      {/* Teks "INTELLEKTULLE SCHULE" - Responsive */}
+      {/* Teks &quot;INTELLEKTULLE SCHULE&quot; - Responsive */}
       <h1
         className="text-3xl md:text-4xl lg:text-6xl font-extrabold mb-6 md:mb-8 drop-shadow-lg relative z-20 px-2"
         style={{ color: '#603017' }}

@@ -2,7 +2,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export async function GET(request: NextRequest) {
+// Interface untuk task dari database
+interface TaskData {
+  id: string;
+  day: number;
+  title: string;
+  description: string;
+  deadline: string;
+  accepts_files: boolean;
+  accepts_links: boolean;
+  max_file_size: number;
+  instruction_files: Array<{ url: string; name: string }>;
+  instruction_links: Array<{ url: string; title: string }>;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interface untuk grouped tasks
+interface GroupedTask {
+  day: number;
+  assignments: Array<{
+    id: string;
+    title: string;
+    description: string;
+    deadline: string;
+    acceptsFiles: boolean;
+    acceptsLinks: boolean;
+    maxFileSize: number;
+    instructionFiles: Array<{ url: string; name: string }>;
+    instructionLinks: Array<{ url: string; title: string }>;
+  }>;
+}
+
+export async function GET() {
   try {
     // Temporarily bypass auth for development
     // TODO: Implement proper authentication in production
@@ -19,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Group tasks by day
-    const groupedTasks = tasks.reduce((acc: any[], task: any) => {
+    const groupedTasks = (tasks as TaskData[]).reduce((acc: GroupedTask[], task) => {
       const existingDay = acc.find(group => group.day === task.day);
       if (existingDay) {
         existingDay.assignments.push({
@@ -27,14 +59,11 @@ export async function GET(request: NextRequest) {
           title: task.title,
           deadline: task.deadline,
           description: task.description,
-          attachmentUrl: task.attachment_url,
           instructionFiles: task.instruction_files || [],
           instructionLinks: task.instruction_links || [],
           acceptsLinks: task.accepts_links,
           acceptsFiles: task.accepts_files,
-          maxFileSize: task.max_file_size,
-          createdAt: task.created_at,
-          updatedAt: task.updated_at
+          maxFileSize: task.max_file_size
         });
       } else {
         acc.push({
@@ -44,14 +73,11 @@ export async function GET(request: NextRequest) {
             title: task.title,
             deadline: task.deadline,
             description: task.description,
-            attachmentUrl: task.attachment_url,
             instructionFiles: task.instruction_files || [],
             instructionLinks: task.instruction_links || [],
             acceptsLinks: task.accepts_links,
             acceptsFiles: task.accepts_files,
-            maxFileSize: task.max_file_size,
-            createdAt: task.created_at,
-            updatedAt: task.updated_at
+            maxFileSize: task.max_file_size
           }]
         });
       }

@@ -6,6 +6,38 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Interface untuk attendance data
+interface AttendanceRecord {
+  session_id: number;
+  status_kehadiran: string;
+  attendance_sessions: {
+    id: number;
+    day_number: number;
+    day_title: string;
+    is_active: boolean;
+    start_time: string | null;
+    end_time: string | null;
+  };
+  user_email: string;
+  full_name: string;
+  jam: string | null;
+  alasan: string | null;
+  foto_url: string | null;
+  waktu: string;
+}
+
+// Interface untuk session stats
+interface SessionStats {
+  [sessionId: string]: {
+    session: AttendanceRecord['attendance_sessions'];
+    total: number;
+    hadir: number;
+    tidakHadir: number;
+    menyusul: number;
+    meninggalkan: number;
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -92,7 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Group by session untuk statistik
-    const sessionStats = attendance.reduce((acc: any, record: any) => {
+    const sessionStats = (attendance as AttendanceRecord[]).reduce((acc: SessionStats, record) => {
       const sessionId = record.session_id;
       if (!acc[sessionId]) {
         acc[sessionId] = {
