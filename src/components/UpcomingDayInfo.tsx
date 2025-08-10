@@ -328,9 +328,9 @@ export default function UpcomingDayInfo() {
               textShadow: "0.5px 0.5px 1px rgba(0,0,0,0.2)",
               fontSize: "18px"
             }}>
-              <p><strong>Materi:</strong> {upcomingDay.description}</p>
+              <p><strong>Deskripsi:</strong> {upcomingDay.description}</p>
               <p><strong>Waktu:</strong> {formatDate(upcomingDay.dateTime)}</p>
-              <p><strong>Ruangan:</strong> {upcomingDay.location}</p>
+              <p><strong>Lokasi:</strong> {upcomingDay.location}</p>
             </div>
           </div>
 
