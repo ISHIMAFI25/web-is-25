@@ -35,17 +35,21 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   useEffect(() => {
     const redirectUser = async () => {
       if (user) {
+        console.log('User already logged in, redirecting...');
         // Cek apakah admin
         const isAdmin = document.cookie
           .split('; ')
           .find(row => row.startsWith('is-admin='))
           ?.split('=')[1] === 'true';
         
-        if (isAdmin) {
-          router.push('/admin');
-        } else {
-          router.push('/tugas');
-        }
+        // Use timeout to ensure proper navigation
+        setTimeout(() => {
+          if (isAdmin) {
+            router.push('/admin');
+          } else {
+            router.push('/');
+          }
+        }, 100);
       }
     };
 

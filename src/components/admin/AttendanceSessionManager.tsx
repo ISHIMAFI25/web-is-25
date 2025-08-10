@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 interface AttendanceSession {
@@ -24,16 +24,12 @@ export default function AttendanceSessionManager() {
   const [createLoading, setCreateLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    fetchSessions();
-  }, []);
-
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       const response = await fetch('/api/attendance-sessions');
       const data = await response.json();
@@ -49,7 +45,11 @@ export default function AttendanceSessionManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   const handleSessionAction = async (sessionId: number, action: 'activate' | 'deactivate') => {
     if (!user?.email) {

@@ -1,8 +1,8 @@
 // src/app/api/days/upcoming/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Fetching upcoming day...');
     const now = new Date().toISOString();

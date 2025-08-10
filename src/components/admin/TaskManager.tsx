@@ -6,7 +6,6 @@ import { Assignment, DayGroup, TaskForm } from '@/types/assignment';
 import { Plus, Edit, Trash2, Save, X, Upload, Link, FileText } from 'lucide-react';
 import FileUploadWidget from '@/components/upload/FileUploadWidget';
 import LinkAttachmentWidget from '@/components/upload/LinkAttachmentWidget';
-import { getFileIcon, getFileName } from '@/lib/uploadHelpers';
 
 interface TaskManagerProps {
   isAdmin: boolean;
@@ -442,7 +441,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-600 mb-4">Belum ada tugas yang tersedia.</p>
             <p className="text-sm text-gray-500 mb-4">
-              Klik "Tambah Tugas Baru" untuk membuat tugas pertama.
+              Klik &quot;Tambah Tugas Baru&quot; untuk membuat tugas pertama.
             </p>
           </div>
         ) : (

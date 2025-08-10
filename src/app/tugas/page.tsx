@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import AssignmentList from '@/components/assignments/AssignmentList';
 import Sidebar from "@/components/ui/sidebar";
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Compass, ScrollText } from "lucide-react";
 import { DayGroup } from '@/types/assignment';
 
 export default function TugasPage() {

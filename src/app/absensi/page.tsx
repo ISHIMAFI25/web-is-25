@@ -23,10 +23,17 @@ interface AttendanceSession {
   end_time: string | null;
 }
 
+interface SubmissionResult {
+  status_approval: 'Disetujui' | 'Pending' | 'Ditolak';
+  approval_message: string;
+  feedback_admin?: string;
+  message?: string;
+}
+
 function AbsensiContent() {
   const { user } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<any>(null);
+  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
   const [activeSession, setActiveSession] = useState<AttendanceSession | null>(null);

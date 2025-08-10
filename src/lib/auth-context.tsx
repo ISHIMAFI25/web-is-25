@@ -152,13 +152,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           try {
             const isValid = await checkSession();
             if (!isValid && window.location.pathname !== '/login') {
+              console.log('Session invalid, redirecting to login');
               router.push('/login');
             }
           } catch (error) {
             console.error('Session check error:', error);
+            // Force logout on error
+            setSession(null);
+            setUser(null);
+            setIsAdmin(false);
+            if (window.location.pathname !== '/login') {
+              router.push('/login');
+            }
           }
         }
-      }, 60000); // Check every minute
+      }, 30000); // Check every 30 seconds instead of 60
     }
 
     return () => {
@@ -172,17 +180,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      // Clear admin cookie
-      if (typeof window !== 'undefined') {
-        document.cookie = "is-admin=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+      console.log('Starting logout process...');
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Supabase signout error:', error);
       }
+      
+      // Clear all cookies
+      if (typeof window !== 'undefined') {
+        // Clear admin cookie
+        document.cookie = "is-admin=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        
+        // Clear all Supabase auth cookies
+        const allCookies = document.cookie.split(';');
+        allCookies.forEach(cookie => {
+          const eqPos = cookie.indexOf('=');
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+          if (name.includes('sb-') && name.includes('auth-token')) {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+          }
+        });
+        
+        // Clear localStorage
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      
+      // Reset state
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
+      
+      console.log('Logout complete, redirecting to login...');
+      
+      // Force redirect to login
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Even on error, clear local state and redirect
       setSession(null);
       setUser(null);
       setIsAdmin(false);
       router.push('/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
     }
   };
 

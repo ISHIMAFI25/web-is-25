@@ -1,8 +1,8 @@
 // src/components/assignments/AssignmentList.tsx
 "use client"; // This is a Client Component because there is user interaction (search, expand)
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { DayGroup, Assignment } from '@/types/assignment';
+import React, { useState, useMemo } from 'react';
+import { DayGroup } from '@/types/assignment';
 import { format } from 'date-fns'; // For date formatting
 import { id } from 'date-fns/locale'; // For date formatting in Indonesian
 import TaskSubmissionWithLink from './TaskSubmissionWithLink';
@@ -16,7 +16,7 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData: initia
   const [expandedAssignmentId, setExpandedAssignmentId] = useState<string | null>(null);
   
   // Use the data passed from parent directly
-  const assignmentsData = initialData || [];
+  const assignmentsData = useMemo(() => initialData || [], [initialData]);
 
   // Function to check if the deadline has passed
   const isDeadlinePassed = (deadline: string): boolean => {
@@ -119,7 +119,7 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignmentsData: initia
             borderColor: "#A0522D",
             color: "#8B4513"
           }}>
-            <p className="mb-2">Tidak ada tugas yang cocok dengan pencarian "{searchTerm}"</p>
+            <p className="mb-2">Tidak ada tugas yang cocok dengan pencarian &quot;{searchTerm}&quot;</p>
             <p className="text-sm opacity-75">Coba gunakan kata kunci yang berbeda</p>
           </div>
         ) : (

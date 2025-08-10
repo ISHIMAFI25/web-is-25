@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { CheckCircle, XCircle, Clock, User, Calendar, AlertCircle } from 'lucide-react';
 
 interface PresensiApproval {
@@ -187,9 +188,11 @@ export default function AdminApprovalPanel() {
                         <div className="text-sm">
                           <strong>Foto Bukti:</strong>
                           <div className="mt-1">
-                            <img 
+                            <Image 
                               src={item.foto_url} 
                               alt="Bukti presensi" 
+                              width={300}
+                              height={128}
                               className="w-full max-w-xs h-32 object-cover rounded border"
                             />
                           </div>
