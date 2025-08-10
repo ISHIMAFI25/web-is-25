@@ -1,80 +1,36 @@
 "use client";
 
-import { Compass, ScrollText } from "lucide-react";
 import Sidebar from "@/components/ui/sidebar";
 import UpcomingDayInfo from "@/components/UpcomingDayInfo";
-import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 export default function HomePage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    // Redirect ke login jika belum login
-    if (!loading && !user) {
-      // Gunakan timeout untuk menghindari konflik navigasi
-      const timer = setTimeout(() => {
-        router.push('/login');
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [user, loading, router]);
-
-  // Show loading state while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-2xl font-bold" style={{ color: "#603017" }}>
-            Loading...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated, show loading (will redirect)
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-2xl font-bold" style={{ color: "#603017" }}>
-            Redirecting...
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <div className="min-h-screen relative">
-      {/* Efek kompas di pojok */}
-      <div className="fixed top-10 right-10 w-32 h-32 opacity-30 z-10">
-        <Compass size={128} className="text-amber-800" />
-      </div>
-      
-      {/* Efek gulungan di pojok kiri */}
-      <div className="fixed bottom-10 left-10 w-24 h-24 opacity-35 z-10">
-        <ScrollText size={96} className="text-amber-900" />
-      </div>
+    <AuthGuard requireAuth={true}>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <main className="flex-1 ml-16">
+          <div className="min-h-screen relative">
+            
+            <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 text-center">
 
-      {/* Sidebar Component */}
-      <Sidebar />
+              {/* Teks "INTELLEKTULLE SCHULE" - Responsive */}
+              <h1
+                className="text-3xl md:text-4xl lg:text-6xl font-extrabold mb-6 md:mb-8 px-2"
+                style={{ 
+                  color: '#FFD700',
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.8), 4px 4px 8px rgba(0,0,0,0.6), 6px 6px 12px rgba(0,0,0,0.4)'
+                }}
+              >
+                INTELLEKTULLE SCHULE 2025
+              </h1>
 
-      {/* Main Content */}
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-        {/* Judul Web */}
-        <h1 className="text-6xl font-extrabold mb-8 drop-shadow-lg" style={{ color: "#603017" }}>
-          IS 2025
-        </h1>
-
-        {/* Upcoming Day Information */}
-        <section className="w-full max-w-4xl">
-          <UpcomingDayInfo />
-        </section>
+              {/* Komponen UpcomingDayInfo */}
+              <UpcomingDayInfo />
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
+    </AuthGuard>
   );
 }
