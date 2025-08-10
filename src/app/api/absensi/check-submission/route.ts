@@ -17,16 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already submitted for this session
+    // Use the database function to check submission
     const { data, error } = await supabase
-      .from('presensi_data')
-      .select('id, status_approval, feedback_admin')
-      .eq('user_email', userEmail)
-      .eq('session_id', sessionId)
-      .single();
+      .rpc('check_user_submission', {
+        p_user_email: userEmail,
+        p_session_id: sessionId
+      });
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows found, which is expected if user hasn't submitted
+    if (error) {
       console.error('Error checking submission:', error);
       return NextResponse.json(
         { error: 'Gagal mengecek status submission' },
@@ -34,17 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If data exists, user has already submitted
-    const hasSubmitted = !!data;
-
-    return NextResponse.json({ 
-      hasSubmitted,
-      submissionData: data ? {
-        id: data.id,
-        status_approval: data.status_approval,
-        feedback_admin: data.feedback_admin
-      } : null
-    });
+    return NextResponse.json(data);
 
   } catch (error) {
     console.error('Error in POST /api/absensi/check-submission:', error);

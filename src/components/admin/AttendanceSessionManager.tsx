@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { 
+  convertToJakartaTimezone, 
+  formatJakartaDateTime, 
+  isAutoCloseTimeReached,
+  validateAutoCloseTime 
+} from '@/lib/timezoneUtils';
 
 interface AttendanceSession {
   id: number;
@@ -8,6 +14,7 @@ interface AttendanceSession {
   is_active: boolean;
   start_time: string | null;
   end_time: string | null;
+  auto_close_time: string | null;
   created_at: string;
   created_by: string;
 }
@@ -19,13 +26,14 @@ export default function AttendanceSessionManager() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [newSession, setNewSession] = useState({
     dayNumber: '',
-    dayTitle: ''
+    dayTitle: '',
+    autoCloseTime: ''
   });
   const [createLoading, setCreateLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text });
+  const showMessage = (type: 'success' | 'error' | 'info', text: string) => {
+    setMessage({ type: type === 'info' ? 'success' : type, text });
     setTimeout(() => setMessage(null), 5000);
   };
 
@@ -49,6 +57,32 @@ export default function AttendanceSessionManager() {
 
   useEffect(() => {
     fetchSessions();
+    
+    // Set up auto-check interval untuk menutup sesi yang sudah lewat waktu
+    const autoCheckInterval = setInterval(async () => {
+      try {
+        // Panggil API auto-close untuk menutup sesi yang sudah lewat waktu
+        const response = await fetch('/api/attendance-sessions/auto-close', {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.closedCount && data.closedCount > 0) {
+            showMessage('success', `${data.closedCount} sesi ditutup otomatis karena melewati waktu yang ditentukan`);
+            // Refresh data setelah auto-close
+            await fetchSessions();
+          }
+        }
+      } catch (error) {
+        console.error('Error in auto-check interval:', error);
+      }
+    }, 60000); // Check setiap 1 menit
+
+    // Cleanup interval saat component unmount
+    return () => {
+      clearInterval(autoCheckInterval);
+    };
   }, [fetchSessions]);
 
   const handleSessionAction = async (sessionId: number, action: 'activate' | 'deactivate') => {
@@ -94,14 +128,27 @@ export default function AttendanceSessionManager() {
       return;
     }
 
-    if (isNaN(Number(newSession.dayNumber)) || Number(newSession.dayNumber) <= 0) {
-      showMessage('error', 'Day number harus berupa angka positif');
+    if (isNaN(Number(newSession.dayNumber)) || Number(newSession.dayNumber) < 0) {
+      showMessage('error', 'Day number harus berupa angka 0 atau lebih');
       return;
+    }
+
+    // Validasi auto close time jika diisi
+    if (newSession.autoCloseTime) {
+      // Konversi ke timezone Asia/Jakarta dan validasi
+      const autoCloseTimeISO = convertToJakartaTimezone(newSession.autoCloseTime);
+      if (!validateAutoCloseTime(autoCloseTimeISO)) {
+        showMessage('error', 'Waktu tutup otomatis harus di masa depan');
+        return;
+      }
     }
 
     setCreateLoading(true);
     
     try {
+      // Konversi auto close time ke format yang benar untuk UTC+7
+      const autoCloseTimeISO = convertToJakartaTimezone(newSession.autoCloseTime);
+
       const response = await fetch('/api/attendance-sessions', {
         method: 'PUT',
         headers: {
@@ -110,6 +157,7 @@ export default function AttendanceSessionManager() {
         body: JSON.stringify({
           dayNumber: Number(newSession.dayNumber),
           dayTitle: newSession.dayTitle,
+          autoCloseTime: autoCloseTimeISO,
           adminEmail: user.email
         }),
       });
@@ -118,7 +166,7 @@ export default function AttendanceSessionManager() {
       
       if (response.ok) {
         showMessage('success', data.message);
-        setNewSession({ dayNumber: '', dayTitle: '' });
+        setNewSession({ dayNumber: '', dayTitle: '', autoCloseTime: '' });
         await fetchSessions(); // Refresh data
       } else {
         showMessage('error', data.error || 'Terjadi kesalahan');
@@ -132,15 +180,26 @@ export default function AttendanceSessionManager() {
   };
 
   const formatDateTime = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatJakartaDateTime(dateString);
+  };
+
+  const checkAutoCloseTimeReached = (autoCloseTime: string | null) => {
+    return isAutoCloseTimeReached(autoCloseTime);
+  };
+
+  const getAutoCloseStatus = (session: AttendanceSession) => {
+    if (!session.auto_close_time) return null;
+    
+    const now = new Date();
+    const autoCloseDate = new Date(session.auto_close_time);
+    
+    if (session.is_active && now >= autoCloseDate) {
+      return 'overdue'; // Sesi aktif tapi sudah lewat waktu tutup
+    } else if (session.is_active && now < autoCloseDate) {
+      return 'scheduled'; // Sesi aktif dengan jadwal tutup
+    } else {
+      return 'expired'; // Sesi tidak aktif
+    }
   };
 
   if (loading) {
@@ -185,7 +244,7 @@ export default function AttendanceSessionManager() {
             <input
               id="dayNumber"
               type="number"
-              min="1"
+              min="0"
               value={newSession.dayNumber}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                 setNewSession(prev => ({ ...prev, dayNumber: e.target.value }))
@@ -208,6 +267,36 @@ export default function AttendanceSessionManager() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="autoCloseTime" className="block text-sm font-medium text-gray-700 mb-1">
+            Waktu Tutup Otomatis <span className="text-gray-500">(Opsional)</span>
+          </label>
+          <input
+            id="autoCloseTime"
+            type="datetime-local"
+            value={newSession.autoCloseTime}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+              setNewSession(prev => ({ ...prev, autoCloseTime: e.target.value }))
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Jika diisi, sesi presensi akan ditutup secara otomatis pada waktu yang ditentukan
+          </p>
+          {newSession.autoCloseTime && (
+            <p className="text-xs text-blue-600 mt-1">
+              Preview: {new Date(newSession.autoCloseTime).toLocaleString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          )}
         </div>
         
         <button 
@@ -244,10 +333,17 @@ export default function AttendanceSessionManager() {
                       </h4>
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                         session.is_active 
-                          ? 'bg-green-200 text-green-800'
-                          : 'bg-gray-200 text-gray-800'
+                          ? session.auto_close_time && checkAutoCloseTimeReached(session.auto_close_time)
+                            ? 'bg-red-200 text-red-800' // Sesi aktif tapi lewat waktu tutup
+                            : 'bg-green-200 text-green-800' // Sesi aktif normal
+                          : 'bg-gray-200 text-gray-800' // Sesi tidak aktif
                       }`}>
-                        {session.is_active ? 'AKTIF' : 'Tidak Aktif'}
+                        {session.is_active 
+                          ? session.auto_close_time && checkAutoCloseTimeReached(session.auto_close_time)
+                            ? 'LEWAT WAKTU'
+                            : 'AKTIF'
+                          : 'Tidak Aktif'
+                        }
                       </span>
                     </div>
                     
@@ -259,6 +355,20 @@ export default function AttendanceSessionManager() {
                       )}
                       {session.end_time && (
                         <p>Ditutup: {formatDateTime(session.end_time)}</p>
+                      )}
+                      {session.auto_close_time && (
+                        <p className={`font-medium ${
+                          session.is_active && checkAutoCloseTimeReached(session.auto_close_time)
+                            ? 'text-red-600'
+                            : session.is_active
+                            ? 'text-orange-600'
+                            : 'text-gray-600'
+                        }`}>
+                          Tutup otomatis: {formatDateTime(session.auto_close_time)}
+                          {session.is_active && checkAutoCloseTimeReached(session.auto_close_time) && (
+                            <span className="ml-2 text-red-500">⚠️ Lewat waktu!</span>
+                          )}
+                        </p>
                       )}
                     </div>
                   </div>

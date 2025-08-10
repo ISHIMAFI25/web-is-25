@@ -13,6 +13,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useState, useEffect } from "react";
 import { uploadFotoToUploadThing } from '@/lib/uploadFotoToUploadThing';
 import { useAuth } from '@/lib/auth-context';
+import { formatJakartaDateTime } from '@/lib/timezoneUtils';
+import { extractUserFullName, extractUserUsername, debugUserData } from '@/lib/userUtils';
 
 interface AttendanceSession {
   id: number;
@@ -21,6 +23,7 @@ interface AttendanceSession {
   is_active: boolean;
   start_time: string | null;
   end_time: string | null;
+  auto_close_time: string | null;
 }
 
 interface SubmissionResult {
@@ -146,18 +149,20 @@ function AbsensiContent() {
       }
       
       const absensiData = {
-        status_kehadiran: formData.statusKehadiran,
-        jam: formData.statusKehadiran === 'Hadir' ? '' : formData.jam,
-        alasan: formData.statusKehadiran === 'Hadir' ? '' : formData.alasan,
-        foto_url: fotoUrl,
-        waktu: new Date().toISOString(),
+        day_id: activeSession.day_number,
+        session_id: activeSession.id,
         user_email: user.email,
-        user_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email, // Legacy field
-        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
-        username: user.user_metadata?.username || user.user_metadata?.preferred_username || user.email?.split('@')[0] || user.email,
-        session_id: activeSession.id
+        full_name: extractUserFullName(user),
+        username: extractUserUsername(user),
+        status_kehadiran: formData.statusKehadiran,
+        alasan: formData.alasan, // Kondisi kesehatan untuk Hadir, alasan untuk lainnya
+        jam_menyusul_meninggalkan: (formData.statusKehadiran === 'Menyusul' || formData.statusKehadiran === 'Meninggalkan') ? formData.jam : null,
+        foto_url: fotoUrl || null,
+        waktu: new Date().toISOString()
       };
       
+      // Debug user data for troubleshooting
+      debugUserData(user);
       console.log('Saving absensi data:', absensiData);
       
       // Submit to new API endpoint
@@ -371,10 +376,16 @@ function AbsensiContent() {
               <Calendar size={18} />
               {getCurrentDate()}
             </p>
-            <p className="flex items-center justify-center gap-2">
+            <p className="flex items-center justify-center gap-2 mb-1">
               <Clock size={18} />
               Waktu Saat Ini: {mounted ? getCurrentTime() : "--:--:--"}
             </p>
+            {activeSession.auto_close_time && (
+              <p className="flex items-center justify-center gap-2 text-orange-700 font-medium">
+                <AlertTriangle size={18} />
+                Sesi ditutup otomatis: {formatJakartaDateTime(activeSession.auto_close_time)}
+              </p>
+            )}
           </div>
           
           {/* Session Status */}
@@ -382,19 +393,6 @@ function AbsensiContent() {
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
               Sesi Aktif
             </span>
-          </div>
-          
-          {/* User Info Display */}
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
-              <User size={16} />
-              Mengisi presensi sebagai:
-            </h3>
-            <div className="text-sm text-blue-800 space-y-1">
-              <p><span className="font-medium">Nama:</span> {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email}</p>
-              <p><span className="font-medium">Username:</span> {user?.user_metadata?.username || user?.user_metadata?.preferred_username || user?.email?.split('@')[0] || user?.email}</p>
-              <p><span className="font-medium">Email:</span> {user?.email}</p>
-            </div>
           </div>
         </div>
 
@@ -498,11 +496,9 @@ function AbsensiContent() {
                     <h4 className="font-semibold mb-2">Detail Absensi:</h4>
                     <div className="text-left space-y-1">
                       <p><strong>Status Kehadiran:</strong> {formData.statusKehadiran}</p>
+                      <p><strong>{formData.statusKehadiran === 'Hadir' ? 'Kondisi Kesehatan' : 'Alasan'}:</strong> {formData.alasan}</p>
                       {(formData.statusKehadiran === "Menyusul" || formData.statusKehadiran === "Meninggalkan") && formData.jam && (
                         <p><strong>Jam {formData.statusKehadiran}:</strong> {formData.jam}</p>
-                      )}
-                      {(formData.statusKehadiran !== "Hadir") && formData.alasan && (
-                        <p><strong>Alasan:</strong> {formData.alasan}</p>
                       )}
                       {(formData.statusKehadiran !== "Hadir") && formData.buktiFoto && (
                         <p><strong>Bukti Foto:</strong> {formData.buktiFoto.name}</p>
@@ -578,7 +574,7 @@ function AbsensiContent() {
                         fontFamily: "serif"
                       }}
                     >
-                      Absen Lagi
+                      Ganti Status Kehadiran
                     </button>
                   </div>
                 </div>
@@ -612,6 +608,34 @@ function AbsensiContent() {
                         <option value="Menyusul">Menyusul</option>
                         <option value="Meninggalkan">Meninggalkan</option>
                       </select>
+                    </div>
+
+                    {/* Alasan untuk semua status kehadiran */}
+                    <div>
+                      <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
+                        color: "#603017",
+                        fontFamily: "serif"
+                      }}>
+                        <User size={18} />
+                        {formData.statusKehadiran === 'Hadir' ? 'Kondisi Kesehatan' : `Alasan ${formData.statusKehadiran}`}
+                      </label>
+                      <textarea
+                        name="alasan"
+                        value={formData.alasan}
+                        onChange={handleInputChange}
+                        required
+                        rows={3}
+                        placeholder={
+                          formData.statusKehadiran === 'Hadir' 
+                            ? "Jelaskan kondisi kesehatan Anda (contoh: Sehat dan siap mengikuti kegiatan)"
+                            : `Jelaskan alasan ${formData.statusKehadiran.toLowerCase()}...`
+                        }
+                        className="w-full p-3 border-2 border-amber-800 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600 resize-none"
+                        style={{ 
+                          backgroundColor: "#fef7ed",
+                          fontFamily: "serif"
+                        }}
+                      />
                     </div>
 
                     {/* Input untuk Tidak Hadir, Menyusul, Meninggalkan */}
@@ -651,31 +675,7 @@ function AbsensiContent() {
                           </div>
                         )}
 
-                        {/* Input Alasan */}
-                        <div>
-                          <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
-                            color: "#603017",
-                            fontFamily: "serif"
-                          }}>
-                            <User size={18} />
-                            Alasan {formData.statusKehadiran}
-                          </label>
-                          <textarea
-                            name="alasan"
-                            value={formData.alasan}
-                            onChange={handleInputChange}
-                            required
-                            rows={3}
-                            placeholder={`Jelaskan alasan ${formData.statusKehadiran.toLowerCase()}...`}
-                            className="w-full p-3 border-2 border-amber-800 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-600 resize-none"
-                            style={{ 
-                              backgroundColor: "#fef7ed",
-                              fontFamily: "serif"
-                            }}
-                          />
-                        </div>
-
-                        {/* Upload Bukti Foto */}
+                        {/* Upload Bukti Foto - hanya untuk non-Hadir */}
                         <div>
                           <label className="flex text-lg font-semibold mb-2 items-center gap-2" style={{ 
                             color: "#603017",

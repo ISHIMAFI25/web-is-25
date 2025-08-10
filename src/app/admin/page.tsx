@@ -6,10 +6,12 @@ import Sidebar from '@/components/ui/sidebar';
 import AdminUserRegistrationForm from '@/components/admin/AdminUserRegistrationForm';
 import AttendanceSessionManager from '@/components/admin/AttendanceSessionManager';
 import AttendanceDataViewer from '@/components/admin/AttendanceDataViewer';
+import AttendanceApprovalManager from '@/components/admin/AttendanceApprovalManager';
 import TaskManager from '@/components/admin/TaskManager';
 import DayManager from '@/components/admin/DayManager';
 import { useState } from 'react';
-import { Users, FileText, Calendar, Clock, BarChart3 } from 'lucide-react';
+import { Users, FileText, Calendar, Clock, BarChart3, CheckSquare } from 'lucide-react';
+import { usePendingApprovalsCount } from '@/hooks/usePendingApprovalsCount';
 
 export default function AdminPage() {
   return (
@@ -24,7 +26,8 @@ export default function AdminPage() {
 
 // Halaman Admin dengan proteksi
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'days' | 'attendance-sessions' | 'attendance-data'>('tasks');
+  const [activeTab, setActiveTab] = useState<'users' | 'tasks' | 'days' | 'attendance-sessions' | 'attendance-data' | 'attendance-approval'>('tasks');
+  const { count: pendingCount, loading: pendingLoading } = usePendingApprovalsCount();
   
   return (
     <div 
@@ -105,6 +108,22 @@ const AdminDashboard = () => {
                     <BarChart3 className="w-4 h-4 inline-block mr-2" />
                     Data Presensi
                   </button>
+                  <button
+                    onClick={() => setActiveTab('attendance-approval')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap relative ${
+                      activeTab === 'attendance-approval'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <CheckSquare className="w-4 h-4 inline-block mr-2" />
+                    Persetujuan Presensi
+                    {!pendingLoading && pendingCount > 0 && (
+                      <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                        {pendingCount}
+                      </span>
+                    )}
+                  </button>
                 </nav>
               </div>
             </div>
@@ -132,6 +151,12 @@ const AdminDashboard = () => {
             {activeTab === 'attendance-data' && (
               <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5">
                 <AttendanceDataViewer />
+              </div>
+            )}
+            
+            {activeTab === 'attendance-approval' && (
+              <div className="bg-white/90 rounded-lg shadow-sm ring-1 ring-gray-900/5 p-4 md:p-6">
+                <AttendanceApprovalManager />
               </div>
             )}
             

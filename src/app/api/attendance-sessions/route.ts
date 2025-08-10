@@ -8,6 +8,9 @@ const supabase = createClient(
 
 export async function GET() {
   try {
+    // Panggil function auto-close terlebih dahulu sebelum fetch data
+    await supabase.rpc('trigger_auto_close');
+    
     // Ambil semua sesi presensi, urutkan berdasarkan day_number
     const { data: sessions, error } = await supabase
       .from('attendance_sessions')
@@ -44,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'activate') {
-      // Nonaktifkan semua sesi lain terlebih dahulu
+      // Nonaktifkan hanya sesi yang sedang aktif
       const { error: deactivateError } = await supabase
         .from('attendance_sessions')
         .update({ 
@@ -52,6 +55,7 @@ export async function POST(request: NextRequest) {
           end_time: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
+        .eq('is_active', true)
         .neq('id', sessionId);
 
       if (deactivateError) {
@@ -135,13 +139,25 @@ export async function POST(request: NextRequest) {
 // API untuk membuat sesi presensi baru (khusus admin)
 export async function PUT(request: NextRequest) {
   try {
-    const { dayNumber, dayTitle, adminEmail } = await request.json();
+    const { dayNumber, dayTitle, autoCloseTime, adminEmail } = await request.json();
 
     if (!dayNumber || !dayTitle || !adminEmail) {
       return NextResponse.json(
         { error: 'Day number, day title, dan admin email diperlukan' },
         { status: 400 }
       );
+    }
+
+    // Validasi auto close time jika ada
+    if (autoCloseTime) {
+      const autoCloseDate = new Date(autoCloseTime);
+      const now = new Date();
+      if (autoCloseDate <= now) {
+        return NextResponse.json(
+          { error: 'Waktu tutup otomatis harus di masa depan' },
+          { status: 400 }
+        );
+      }
     }
 
     // Cek apakah day number sudah ada
@@ -165,6 +181,7 @@ export async function PUT(request: NextRequest) {
         day_number: dayNumber,
         day_title: dayTitle,
         is_active: false,
+        auto_close_time: autoCloseTime || null,
         created_by: adminEmail
       })
       .select()
