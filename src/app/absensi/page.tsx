@@ -15,6 +15,7 @@ import { uploadFotoToUploadThing } from '@/lib/uploadFotoToUploadThing';
 import { useAuth } from '@/lib/auth-context';
 import { formatJakartaDateTime } from '@/lib/timezoneUtils';
 import { extractUserFullName, extractUserUsername, debugUserData } from '@/lib/userUtils';
+import UserSubmissionStatus from '@/components/attendance/UserSubmissionStatus';
 
 interface AttendanceSession {
   id: number;
@@ -252,7 +253,7 @@ function AbsensiContent() {
       <div className="min-h-screen relative">
         <Sidebar />
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-2xl text-center">
+          <div className="w-full max-w-4xl">
             <Link 
               href="/" 
               className="inline-flex items-center gap-2 text-amber-800 hover:text-amber-900 transition-colors mb-6"
@@ -261,11 +262,21 @@ function AbsensiContent() {
               <span className="font-medium" style={{ fontFamily: "serif" }}>Kembali ke Beranda</span>
             </Link>
             
-            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-6 rounded-lg">
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-6 rounded-lg mb-6">
               <AlertTriangle size={48} className="mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Sesi Presensi Tidak Tersedia</h2>
-              <p>Tidak ada sesi presensi yang sedang aktif saat ini. Silakan hubungi admin untuk membuka sesi presensi.</p>
+              <h2 className="text-xl font-bold mb-2 text-center">Sesi Presensi Tidak Tersedia</h2>
+              <p className="text-center">Tidak ada sesi presensi yang sedang aktif saat ini. Silakan hubungi admin untuk membuka sesi presensi.</p>
             </div>
+
+            {/* Tampilkan riwayat status presensi user */}
+            {user?.email && (
+              <UserSubmissionStatus 
+                userEmail={user.email}
+                user={user}
+                showTitle={true}
+                maxItems={10}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -278,7 +289,7 @@ function AbsensiContent() {
       <div className="min-h-screen relative">
         <Sidebar />
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-2xl text-center">
+          <div className="w-full max-w-4xl">
             <Link 
               href="/" 
               className="inline-flex items-center gap-2 text-amber-800 hover:text-amber-900 transition-colors mb-6"
@@ -287,9 +298,9 @@ function AbsensiContent() {
               <span className="font-medium" style={{ fontFamily: "serif" }}>Kembali ke Beranda</span>
             </Link>
             
-            <div className="bg-green-100 border border-green-400 text-green-800 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-2">Presensi Sudah Terkirim</h2>
-              <p className="mb-4">Anda sudah mengisi presensi untuk {activeSession.day_title}. Setiap peserta hanya bisa mengisi presensi sekali per sesi.</p>
+            <div className="bg-green-100 border border-green-400 text-green-800 p-6 rounded-lg mb-6">
+              <h2 className="text-xl font-bold mb-2 text-center">Presensi Sudah Terkirim</h2>
+              <p className="mb-4 text-center">Anda sudah mengisi presensi untuk {activeSession.day_title}. Setiap peserta hanya bisa mengisi presensi sekali per sesi.</p>
               
               {/* Status Approval Information */}
               {submissionResult && (
@@ -300,7 +311,7 @@ function AbsensiContent() {
                     ? 'bg-yellow-100 border-yellow-600'
                     : 'bg-red-100 border-red-600'
                 }`}>
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <h4 className="font-semibold mb-2 flex items-center gap-2 justify-center">
                     {submissionResult.status_approval === 'Disetujui' && (
                       <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -318,22 +329,32 @@ function AbsensiContent() {
                     )}
                     Status Persetujuan: {submissionResult.status_approval}
                   </h4>
-                  <p className="text-sm mb-2">
+                  <p className="text-sm mb-2 text-center">
                     {submissionResult.approval_message}
                   </p>
                   {submissionResult.feedback_admin && (
-                    <p className="text-sm italic mt-2">
+                    <p className="text-sm italic mt-2 text-center">
                       <strong>Feedback Admin:</strong> {submissionResult.feedback_admin}
                     </p>
                   )}
                   {submissionResult.status_approval === 'Pending' && (
-                    <p className="text-xs mt-2 italic">
+                    <p className="text-xs mt-2 italic text-center">
                       💡 Admin akan meninjau presensi Anda. Status akan diupdate setelah ditinjau.
                     </p>
                   )}
                 </div>
               )}
             </div>
+
+            {/* Tampilkan riwayat status presensi user */}
+            {user?.email && (
+              <UserSubmissionStatus 
+                userEmail={user.email}
+                user={user}
+                showTitle={true}
+                maxItems={10}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -749,6 +770,18 @@ function AbsensiContent() {
               )}
             </CardContent>
           </Card>
+        </section>
+
+        {/* Riwayat Status Presensi */}
+        <section className="w-full max-w-4xl mt-8">
+          {user?.email && (
+            <UserSubmissionStatus 
+              userEmail={user.email}
+              user={user}
+              showTitle={true}
+              maxItems={5}
+            />
+          )}
         </section>
       </div>
     </div>
