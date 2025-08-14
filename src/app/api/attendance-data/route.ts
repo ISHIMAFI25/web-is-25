@@ -7,35 +7,51 @@ const supabase = createClient(
 );
 
 // Interface untuk attendance data
-interface AttendanceRecord {
+// Catatan: Tabel yang benar untuk data presensi terperinci adalah 'attendance_data'.
+// Kode awal salah menggunakan tabel 'absensi'. Kita sesuaikan tipe dan mapping di bawah.
+
+interface RawAttendanceData {
+  id: number;
   session_id: number;
-  status_kehadiran: string;
-  attendance_sessions: {
-    id: number;
-    day_number: number;
-    day_title: string;
-    is_active: boolean;
-    start_time: string | null;
-    end_time: string | null;
-  };
   user_email: string;
   full_name: string;
+  username: string;
+  status_kehadiran: string;
+  alasan: string | null;
+  jam_menyusul_meninggalkan: string | null;
+  foto_url: string | null;
+  created_at: string;
+  attendance_sessions: {
+    day_number: number;
+    day_title: string;
+  };
+}
+
+interface TransformedAttendanceRecord {
+  id: number;
+  status_kehadiran: string;
   jam: string | null;
   alasan: string | null;
   foto_url: string | null;
-  waktu: string;
+  waktu: string; // mapped from created_at
+  user_email: string;
+  user_name: string; // alias full_name
+  full_name: string;
+  username: string;
+  session_id: number;
+  attendance_sessions?: {
+    day_number: number;
+    day_title: string;
+  };
 }
 
-// Interface untuk session stats
-interface SessionStats {
-  [sessionId: string]: {
-    session: AttendanceRecord['attendance_sessions'];
-    total: number;
-    hadir: number;
-    tidakHadir: number;
-    menyusul: number;
-    meninggalkan: number;
-  };
+interface SessionStatsItem {
+  session: { day_number: number; day_title: string };
+  total: number;
+  hadir: number;
+  tidakHadir: number;
+  menyusul: number;
+  meninggalkan: number;
 }
 
 export async function GET(request: NextRequest) {
@@ -50,26 +66,56 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Ambil data presensi untuk session tertentu dengan join ke attendance_sessions
-    const { data: attendance, error } = await supabase
-      .from('absensi')
+    // Ambil data presensi dari attendance_data (bukan absensi) + join attendance_sessions
+    const { data, error } = await supabase
+      .from('attendance_data')
       .select(`
-        *,
+        id,
+        session_id,
+        user_email,
+        full_name,
+        username,
+        status_kehadiran,
+        alasan,
+        jam_menyusul_meninggalkan,
+        foto_url,
+        created_at,
         attendance_sessions!inner(
           day_number,
           day_title
         )
       `)
       .eq('session_id', sessionId)
-      .order('waktu', { ascending: true });
+      .order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error fetching attendance data:', error);
+      console.error('Error fetching attendance data (attendance_data):', error, {
+        sessionId,
+        code: (error as any)?.code,
+        details: (error as any)?.details,
+        hint: (error as any)?.hint,
+        message: (error as any)?.message,
+      });
       return NextResponse.json(
         { error: 'Gagal mengambil data presensi' },
         { status: 500 }
       );
     }
+
+  const attendance: TransformedAttendanceRecord[] = (data as unknown as RawAttendanceData[]).map(r => ({
+      id: r.id,
+      status_kehadiran: r.status_kehadiran,
+      jam: r.jam_menyusul_meninggalkan,
+      alasan: r.alasan,
+      foto_url: r.foto_url,
+      waktu: r.created_at,
+      user_email: r.user_email,
+      user_name: r.full_name,
+      full_name: r.full_name,
+      username: r.username,
+      session_id: r.session_id,
+      attendance_sessions: r.attendance_sessions
+    }));
 
     return NextResponse.json({ attendance });
 
@@ -88,17 +134,24 @@ export async function POST(request: NextRequest) {
     const { startDate, endDate, sessionIds } = await request.json();
 
     let query = supabase
-      .from('absensi')
+      .from('attendance_data')
       .select(`
-        *,
+        id,
+        session_id,
+        user_email,
+        full_name,
+        username,
+        status_kehadiran,
+        alasan,
+        jam_menyusul_meninggalkan,
+        foto_url,
+        created_at,
         attendance_sessions!inner(
           day_number,
-          day_title,
-          start_time,
-          end_time
+          day_title
         )
       `)
-      .order('waktu', { ascending: false });
+      .order('created_at', { ascending: false });
 
     // Filter berdasarkan tanggal jika disediakan
     if (startDate) {
@@ -113,53 +166,59 @@ export async function POST(request: NextRequest) {
       query = query.in('session_id', sessionIds);
     }
 
-    const { data: attendance, error } = await query;
+  const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching all attendance data:', error);
+      console.error('Error fetching all attendance data (attendance_data):', error, {
+        code: (error as any)?.code,
+        details: (error as any)?.details,
+        hint: (error as any)?.hint,
+        message: (error as any)?.message,
+        filters: { startDate, endDate, sessionIds }
+      });
       return NextResponse.json(
         { error: 'Gagal mengambil data presensi' },
         { status: 500 }
       );
     }
 
+  const transformed: TransformedAttendanceRecord[] = (data as unknown as RawAttendanceData[]).map(r => ({
+      id: r.id,
+      status_kehadiran: r.status_kehadiran,
+      jam: r.jam_menyusul_meninggalkan,
+      alasan: r.alasan,
+      foto_url: r.foto_url,
+      waktu: r.created_at,
+      user_email: r.user_email,
+      user_name: r.full_name,
+      full_name: r.full_name,
+      username: r.username,
+      session_id: r.session_id,
+      attendance_sessions: r.attendance_sessions
+    }));
+
     // Group by session untuk statistik
-    const sessionStats = (attendance as AttendanceRecord[]).reduce((acc: SessionStats, record) => {
-      const sessionId = record.session_id;
-      if (!acc[sessionId]) {
-        acc[sessionId] = {
-          session: record.attendance_sessions,
-          total: 0,
-          hadir: 0,
-          tidakHadir: 0,
-          menyusul: 0,
-          meninggalkan: 0
-        };
+    const statsMap = new Map<number, SessionStatsItem>();
+    for (const rec of transformed) {
+      if (!statsMap.has(rec.session_id)) {
+        statsMap.set(rec.session_id, {
+          session: rec.attendance_sessions || { day_number: 0, day_title: '' },
+          total: 0, hadir: 0, tidakHadir: 0, menyusul: 0, meninggalkan: 0
+        });
       }
-      
-      acc[sessionId].total++;
-      
-      switch (record.status_kehadiran) {
-        case 'Hadir':
-          acc[sessionId].hadir++;
-          break;
-        case 'Tidak Hadir':
-          acc[sessionId].tidakHadir++;
-          break;
-        case 'Menyusul':
-          acc[sessionId].menyusul++;
-          break;
-        case 'Meninggalkan':
-          acc[sessionId].meninggalkan++;
-          break;
+      const bucket = statsMap.get(rec.session_id)!;
+      bucket.total++;
+      switch (rec.status_kehadiran) {
+        case 'Hadir': bucket.hadir++; break;
+        case 'Tidak Hadir': bucket.tidakHadir++; break;
+        case 'Menyusul': bucket.menyusul++; break;
+        case 'Meninggalkan': bucket.meninggalkan++; break;
       }
-      
-      return acc;
-    }, {});
+    }
 
     return NextResponse.json({ 
-      attendance, 
-      statistics: Object.values(sessionStats) 
+      attendance: transformed,
+      statistics: Array.from(statsMap.values())
     });
 
   } catch (error) {

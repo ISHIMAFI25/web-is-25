@@ -69,6 +69,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (error) {
         console.error('Session check error:', error);
+        // Jika error terkait refresh token yang invalid / hilang, bersihkan semua jejak auth lokal
+        if (typeof error.message === 'string' && /refresh token/i.test(error.message)) {
+          if (typeof window !== 'undefined') {
+            // Hapus semua cookie supabase (auth dan refresh)
+            document.cookie.split(';').forEach(c => {
+              const name = c.split('=')[0].trim();
+              if (name.startsWith('sb-')) {
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+              }
+            });
+            // Hapus storage lokal custom bila ada
+            try { localStorage.removeItem('supabase-auth'); } catch {}
+          }
+        }
         setSession(null);
         setUser(null);
         setIsAdmin(false);
@@ -121,22 +135,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event, currentSession) => {
         if (!mounted) return;
-        
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (event === 'SIGNED_OUT' || !session) {
+
+        console.log('Auth state changed:', event, currentSession?.user?.id);
+
+        if (event === 'SIGNED_OUT' || !currentSession) {
           setSession(null);
           setUser(null);
           setIsAdmin(false);
-          // Clear admin cookie
+          // Bersihkan cookie admin & (opsional) auth rusak saat sign out
           if (typeof window !== 'undefined') {
             document.cookie = "is-admin=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
           }
         } else {
-          setSession(session);
-          setUser(session.user);
+          setSession(currentSession);
+            setUser(currentSession.user);
           checkAdminStatus();
         }
         setLoading(false);
@@ -181,45 +195,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = async () => {
     try {
       console.log('Starting logout process...');
-      
-      // Sign out from Supabase
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Supabase signout error:', error);
       }
-      
-      // Clear all cookies
+
       if (typeof window !== 'undefined') {
-        // Clear admin cookie
-        document.cookie = "is-admin=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-        
-        // Clear all Supabase auth cookies
-        const allCookies = document.cookie.split(';');
-        allCookies.forEach(cookie => {
-          const eqPos = cookie.indexOf('=');
-          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-          if (name.includes('sb-') && name.includes('auth-token')) {
+        // Hapus semua cookie terkait supabase (auth & refresh)
+        document.cookie.split(';').forEach(c => {
+          const name = c.split('=')[0].trim();
+          if (name.startsWith('sb-')) {
             document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
           }
         });
-        
-        // Clear localStorage
-        localStorage.clear();
-        sessionStorage.clear();
+        // Hapus cookie admin
+        document.cookie = "is-admin=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        // Hapus entry storage spesifik
+        try { localStorage.removeItem('supabase-auth'); } catch {}
+        try { sessionStorage.removeItem('supabase-auth'); } catch {}
       }
-      
-      // Reset state
+
       setSession(null);
       setUser(null);
       setIsAdmin(false);
-      
       console.log('Logout complete, redirecting to login...');
-      
-      // Force redirect to login
       router.push('/login');
     } catch (error) {
       console.error('Error signing out:', error);
-      // Even on error, clear local state and redirect
       setSession(null);
       setUser(null);
       setIsAdmin(false);
