@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Interface untuk Supabase Error
+interface SupabaseError {
+  code?: string;
+  details?: string;
+  hint?: string;
+  message?: string;
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -91,10 +99,10 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Error fetching attendance data (attendance_data):', error, {
         sessionId,
-        code: (error as any)?.code,
-        details: (error as any)?.details,
-        hint: (error as any)?.hint,
-        message: (error as any)?.message,
+        code: (error as SupabaseError)?.code,
+        details: (error as SupabaseError)?.details,
+        hint: (error as SupabaseError)?.hint,
+        message: (error as SupabaseError)?.message,
       });
       return NextResponse.json(
         { error: 'Gagal mengambil data presensi' },
@@ -170,10 +178,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching all attendance data (attendance_data):', error, {
-        code: (error as any)?.code,
-        details: (error as any)?.details,
-        hint: (error as any)?.hint,
-        message: (error as any)?.message,
+        code: (error as SupabaseError)?.code,
+        details: (error as SupabaseError)?.details,
+        hint: (error as SupabaseError)?.hint,
+        message: (error as SupabaseError)?.message,
         filters: { startDate, endDate, sessionIds }
       });
       return NextResponse.json(
