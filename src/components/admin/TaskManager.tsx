@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Assignment, DayGroup, TaskForm } from '@/types/assignment';
-import { Plus, Edit, Trash2, Save, X, Upload, Link, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload, Link, FileText, Download } from 'lucide-react';
 import FileUploadWidget from '@/components/upload/FileUploadWidget';
 import LinkAttachmentWidget from '@/components/upload/LinkAttachmentWidget';
 
@@ -213,6 +213,30 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
       ...prev,
       instructionLinks: links
     }));
+  };
+
+  const handleDownloadCSV = async (taskId: string, taskTitle: string) => {
+    try {
+      const res = await fetch(`/api/admin/tasks/${taskId}/submissions/csv`);
+      if (!res.ok) {
+        showNotification('Gagal mengambil CSV', 'error');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safe = taskTitle.replace(/[^a-zA-Z0-9_-]+/g, '_').slice(0,40) || taskId;
+      a.href = url;
+      a.download = `submissions-${safe}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showNotification('CSV diunduh');
+    } catch (e) {
+      console.error(e);
+      showNotification('Error download CSV', 'error');
+    }
   };
 
   if (!isAdmin) {
@@ -481,6 +505,13 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => handleDownloadCSV(task.id, task.title)}
+                          className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                          title="Download CSV submissions"
+                        >
+                          <Download size={16} />
+                        </button>
                         <button
                           onClick={() => startEditTask(task)}
                           className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
