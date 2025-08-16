@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   title: "Intellektuelle Schule 25",
   description: "Website IS 25",
   icons: {
-    icon: '/favicon_v1.ico',
+  icon: '/favicon.ico', // updated to match file placed in /public
   },
 };
 
