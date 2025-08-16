@@ -27,6 +27,9 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "Intellektuelle Schule 25",
   description: "Website IS 25",
+  icons: {
+    icon: '/favicon_v1.ico',
+  },
 };
 
 export default function RootLayout({
