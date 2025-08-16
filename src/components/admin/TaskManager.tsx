@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Assignment, DayGroup, TaskForm } from '@/types/assignment';
-import { Plus, Edit, Trash2, Save, X, Upload, Link, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload, Link, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import FileUploadWidget from '@/components/upload/FileUploadWidget';
 import LinkAttachmentWidget from '@/components/upload/LinkAttachmentWidget';
 
@@ -213,6 +213,43 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
       ...prev,
       instructionLinks: links
     }));
+  };
+
+  const [openDownloadMenu, setOpenDownloadMenu] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-download-menu-root]')) {
+        setOpenDownloadMenu(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleDownload = async (taskId: string, taskTitle: string, format: 'csv' | 'xlsx') => {
+    try {
+      const res = await fetch(`/api/admin/tasks/${taskId}/submissions/${format}`);
+      if (!res.ok) {
+        showNotification(`Gagal mengambil ${format.toUpperCase()}`, 'error');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safe = taskTitle.replace(/[^a-zA-Z0-9_-]+/g, '_').slice(0,40) || taskId;
+      a.href = url;
+      a.download = `submissions-${safe}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showNotification(`${format.toUpperCase()} diunduh`);
+    } catch (e) {
+      console.error(e);
+      showNotification(`Error download ${format.toUpperCase()}`, 'error');
+    }
   };
 
   if (!isAdmin) {
@@ -481,6 +518,34 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isAdmin }) => {
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
+                        <div className="relative" data-download-menu-root>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenDownloadMenu(prev => prev === task.id ? null : task.id);
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${openDownloadMenu === task.id ? 'bg-green-100 text-green-700' : 'text-green-600 hover:bg-green-100'}`}
+                            title="Download submissions (CSV/XLSX)"
+                          >
+                            <Download size={16} />
+                          </button>
+                          {openDownloadMenu === task.id && (
+                            <div className="absolute right-0 top-full mt-0.5 bg-white border border-gray-200 rounded shadow-lg z-20 min-w-[140px] overflow-hidden animate-fade-in">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setOpenDownloadMenu(null); handleDownload(task.id, task.title, 'csv'); }}
+                                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-gray-50 text-gray-700"
+                              >
+                                <FileText size={14} /> Download CSV
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setOpenDownloadMenu(null); handleDownload(task.id, task.title, 'xlsx'); }}
+                                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-gray-50 text-gray-700"
+                              >
+                                <FileSpreadsheet size={14} /> Download XLSX
+                              </button>
+                            </div>
+                          )}
+                        </div>
                         <button
                           onClick={() => startEditTask(task)}
                           className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
