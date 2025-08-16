@@ -2,7 +2,30 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-function csvEscape(value: any): string {
+interface TaskSubmissionRow {
+  id: number;
+  student_email: string;
+  student_name: string;
+  task_id: string;
+  task_day: number;
+  submission_type: 'file' | 'link' | 'both' | string;
+  submission_file_url: string | null;
+  submission_file_name: string | null;
+  submission_file_type: string | null;
+  submission_link: string | null;
+  submission_status: 'draft' | 'submitted' | string;
+  is_submitted: boolean | null;
+  submitted_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  // Allow additional unknown keys without using any
+  [key: string]: unknown;
+}
+
+type ColumnKey = keyof TaskSubmissionRow;
+
+// Escape CSV fields safely
+function csvEscape(value: unknown): string {
   if (value === null || value === undefined) return '';
   const str = String(value);
   if (/[",\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
@@ -28,8 +51,8 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to fetch submissions' }, { status: 500 });
     }
 
-    const rows = data || [];
-    const columns: Array<{ key: string; header: string }> = [
+  const rows: TaskSubmissionRow[] = (data as TaskSubmissionRow[]) || [];
+  const columns: Array<{ key: ColumnKey; header: string }> = [
       { key: 'id', header: 'id' },
       { key: 'student_email', header: 'student_email' },
       { key: 'student_name', header: 'student_name' },
@@ -49,8 +72,7 @@ export async function GET(
 
     const headerLine = columns.map(c => c.header).join(',');
     const dataLines = rows.map(r => columns.map(c => {
-      let val = (r as any)[c.key];
-      if (val instanceof Date) val = val.toISOString();
+      const val = r[c.key];
       return csvEscape(val);
     }).join(','));
 

@@ -3,6 +3,25 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import ExcelJS from 'exceljs';
 
+interface TaskSubmissionRow {
+  id: number;
+  student_email: string;
+  student_name: string;
+  task_id: string;
+  task_day: number;
+  submission_type: 'file' | 'link' | 'both' | string;
+  submission_file_url: string | null;
+  submission_file_name: string | null;
+  submission_file_type: string | null;
+  submission_link: string | null;
+  submission_status: 'draft' | 'submitted' | string;
+  is_submitted: boolean | null;
+  submitted_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  [key: string]: unknown;
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ taskId: string }> }
@@ -22,7 +41,7 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to fetch submissions' }, { status: 500 });
     }
 
-    const rows = data || [];
+  const rows: TaskSubmissionRow[] = (data as TaskSubmissionRow[]) || [];
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Submissions');
 
@@ -43,7 +62,7 @@ export async function GET(
       { header: 'Created At', key: 'created_at', width: 22 },
       { header: 'Updated At', key: 'updated_at', width: 22 }
     ];
-    sheet.columns = columns as any;
+  sheet.columns = columns as ExcelJS.Column[];
 
     rows.forEach(r => {
       sheet.addRow({
