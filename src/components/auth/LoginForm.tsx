@@ -28,8 +28,8 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   const router = useRouter();
   const { user, checkSession } = useAuth();
 
-  const ADMIN_USERNAME = "admin";
-  const ADMIN_PASSWORD = "admin123"; // Ganti sesuai kebutuhan
+  const ADMIN_USERNAME = "sangrajais";
+  const ADMIN_PASSWORD = "y9oFZKt5DG"; // Ganti sesuai kebutuhan
 
   // Redirect jika sudah login
   useEffect(() => {
