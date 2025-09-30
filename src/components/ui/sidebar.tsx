@@ -1,17 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Calendar, Info } from "lucide-react";
-import { useState } from "react";
+import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Calendar, Info, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [countdownMode, setCountdownMode] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const router = useRouter();
 
   console.log('🎯 Sidebar: user =', user?.email, 'isAdmin =', isAdmin);
+
+  // Check countdown mode status
+  useEffect(() => {
+    const checkCountdownMode = async () => {
+      try {
+        const response = await fetch('/api/countdown/status');
+        const result = await response.json();
+        if (result.success && result.data) {
+          // Hanya set countdown mode untuk non-admin
+          setCountdownMode(result.data.showOnlyCountdown && !isAdmin);
+        }
+      } catch (error) {
+        console.error('Error checking countdown mode:', error);
+      }
+    };
+
+    checkCountdownMode();
+    // Check every 30 seconds
+    const interval = setInterval(checkCountdownMode, 30000);
+    return () => clearInterval(interval);
+  }, [isAdmin]); // Tambahkan isAdmin sebagai dependency
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -83,34 +105,11 @@ export default function Sidebar() {
               >
                 <Home size={18} className="md:w-5 md:h-5" color="#603017" />
                 <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
-                  home
+                  Home
                 </span>
               </Link>
             </li>
-            <li>
-              <Link
-                href="/tugas"
-                className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition"
-                onClick={toggleSidebar}
-              >
-                <Upload size={18} className="md:w-5 md:h-5" color="#603017" />
-                <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
-                  Tugas
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/absensi"
-                className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition"
-                onClick={toggleSidebar}
-              >
-                <UserRoundCheck size={20} color="#603017" />
-                <span className="font-medium" style={{ color: "#603017" }}>
-                  Presensi
-                </span>
-              </Link>
-            </li>
+            
             <li>
               <Link
                 href="/profil"
@@ -123,8 +122,38 @@ export default function Sidebar() {
                 </span>
               </Link>
             </li>
+
+            {/* Menu lainnya hanya tampil jika bukan countdown mode ATAU jika user adalah admin */}
+            {(!countdownMode || isAdmin) && (
+              <>
+                <li>
+                  <Link
+                    href="/tugas"
+                    className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition"
+                    onClick={toggleSidebar}
+                  >
+                    <Upload size={18} className="md:w-5 md:h-5" color="#603017" />
+                    <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
+                      Tugas
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/absensi"
+                    className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition"
+                    onClick={toggleSidebar}
+                  >
+                    <UserRoundCheck size={20} color="#603017" />
+                    <span className="font-medium" style={{ color: "#603017" }}>
+                      Presensi
+                    </span>
+                  </Link>
+                </li>
+              </>
+            )}
             
-            {/* Admin Menu - Hanya tampil jika user adalah admin */}
+            {/* Admin Menu - Selalu tampil untuk admin */}
             {isAdmin && (
               <>
                 <li>
@@ -136,6 +165,18 @@ export default function Sidebar() {
                     <Shield size={18} className="md:w-5 md:h-5" color="#603017" />
                     <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
                       Admin Panel
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/admin/lantik"
+                    className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-lg hover:bg-gray-100 transition border border-purple-300 bg-purple-50"
+                    onClick={toggleSidebar}
+                  >
+                    <Clock size={18} className="md:w-5 md:h-5" color="#603017" />
+                    <span className="font-medium text-sm md:text-base" style={{ color: "#603017" }}>
+                      Lantik
                     </span>
                   </Link>
                 </li>
