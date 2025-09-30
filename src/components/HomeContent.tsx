@@ -77,8 +77,8 @@ export default function HomeContent() {
     }
   };
 
-  // Jika countdown mode aktif dan user bukan admin
-  const showCountdownMode = countdownData && countdownData.showOnlyCountdown && !isAdmin;
+  // Jika countdown mode aktif - admin tetap bisa lihat countdown
+  const showCountdownMode = countdownData && countdownData.showOnlyCountdown;
 
   return (
     <div 
@@ -146,8 +146,8 @@ export default function HomeContent() {
           </div>
         )}
 
-        {/* Konten Day Info - hanya tampil jika bukan countdown mode atau jika admin */}
-        {(!showCountdownMode || isAdmin) && (
+        {/* Konten Day Info - disembunyikan sementara (kode dipertahankan) */}
+        {false && !showCountdownMode && (
           <div className="w-full max-w-4xl">
             <UpcomingDayInfo />
           </div>

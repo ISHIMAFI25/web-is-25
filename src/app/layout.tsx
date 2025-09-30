@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Cinzel, Roboto } from "next/font/google"; // Hapus Inter yang tidak digunakan
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import BGMPlayer from "@/components/BGMPlayer";
 
 // Inisialisasi font Cinzel. Kita akan menggunakan ini untuk seluruh body.
 const cinzel = Cinzel({
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body className={`${cinzel.className} ${roboto.variable}`}>
         <AuthProvider>
           {children}
+          <BGMPlayer />
         </AuthProvider>
       </body>
     </html>
