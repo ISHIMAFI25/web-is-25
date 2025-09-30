@@ -1,5 +1,4 @@
 // src/lib/uploadHelpers.ts
-import { useUploadThing } from "@/lib/uploadthing";
 
 export interface UploadedFile {
   url: string;
@@ -15,10 +14,7 @@ export interface UploadResponse {
 }
 
 // Helper function to upload files to UploadThing
-export const uploadFilesToUploadThing = async (
-  files: File[],
-  endpoint: "dayFilesUploader" | "instructionFilesUploader"
-): Promise<UploadResponse> => {
+export const uploadFilesToUploadThing = async (): Promise<UploadResponse> => {
   try {
     // We'll use this in components with the useUploadThing hook
     return { success: false, error: "Use uploadFiles from useUploadThing hook" };

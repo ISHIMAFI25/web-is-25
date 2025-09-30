@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, Calendar } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 interface CountdownData {
@@ -26,7 +26,7 @@ export default function CountdownDisplay() {
   const [countdownData, setCountdownData] = useState<CountdownData | null>(null);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [loading, setLoading] = useState(true);
-  const { isAdmin, user, signOut } = useAuth(); // Tambah signOut function
+  const { isAdmin, user } = useAuth(); // Tambah signOut function
 
   useEffect(() => {
     fetchCountdownStatus();
@@ -73,17 +73,6 @@ export default function CountdownDisplay() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   if (loading) {

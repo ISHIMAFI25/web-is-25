@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Calendar, Info, Clock } from "lucide-react";
+import { AlignJustify, X, Home, Upload, LogOut, UserRoundCheck, User, Shield, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";

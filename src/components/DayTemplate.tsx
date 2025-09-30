@@ -55,6 +55,7 @@ export default function DayPage({ dayNumber }: DayPageProps) {
     } else if (!loading && user) {
       fetchDayData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, router, dayNumber]);
 
   const fetchDayData = useCallback(async () => {

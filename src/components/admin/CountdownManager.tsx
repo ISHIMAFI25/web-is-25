@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Clock, Play, Pause, Trash2, Eye, EyeOff, Plus } from 'lucide-react';
+import Image from 'next/image';
 
 interface CountdownData {
   id: number;
@@ -365,7 +366,7 @@ export default function CountdownManager() {
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="showOnlyCountdown" className="ml-2 block text-sm text-gray-700">
-                Aktifkan mode "Countdown Only" (Sembunyikan semua konten website)
+                Aktifkan mode &quot;Countdown Only&quot; (Sembunyikan semua konten website)
               </label>
             </div>
 
@@ -507,7 +508,7 @@ export default function CountdownManager() {
               <div className="absolute inset-0 bg-black/40"></div>
               <div className="relative z-10 text-center">
                 <div className="mb-4">
-                  <img src="/logois.png" alt="Logo" className="w-16 h-16 mx-auto mb-4" />
+                  <Image src="/logois.png" alt="Logo" width={64} height={64} className="w-16 h-16 mx-auto mb-4" priority />
                   <h1 className="text-2xl md:text-4xl font-extrabold text-white mb-4">
                     INTELLEKTUELLE SCHULE 2025
                   </h1>

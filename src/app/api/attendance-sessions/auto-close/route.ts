@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -7,7 +7,8 @@ const supabase = createClient(
 );
 
 // API untuk auto-close sesi yang sudah melewati waktu tutup otomatis
-export async function POST(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function POST(_request: Request) {
   try {
     // Gunakan database function v2 yang simple untuk auto-close
     const { data: result, error } = await supabase

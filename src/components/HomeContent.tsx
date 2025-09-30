@@ -27,8 +27,7 @@ interface TimeLeft {
 export default function HomeContent() {
   const [countdownData, setCountdownData] = useState<CountdownData | null>(null);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [loading, setLoading] = useState(true);
-  const { isAdmin, user } = useAuth();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     fetchCountdownStatus();
@@ -75,8 +74,6 @@ export default function HomeContent() {
       }
     } catch (error) {
       console.error('Error fetching countdown status:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
