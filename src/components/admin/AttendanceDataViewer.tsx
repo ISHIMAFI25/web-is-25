@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/lib/auth-context';
 
 interface AttendanceRecord {
   id: number;
@@ -35,12 +34,14 @@ export default function AttendanceDataViewer() {
 
   useEffect(() => {
     fetchSessions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (selectedSession) {
       fetchAttendanceData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSession]);
 
   const showMessage = (type: 'success' | 'error', text: string) => {

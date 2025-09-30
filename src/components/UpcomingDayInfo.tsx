@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Clock, File, Eye, UserRoundCheck } from 'lucide-react';
+import { File, Eye, UserRoundCheck } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { getFileIcon, getFileName } from '@/lib/uploadHelpers';
 import Link from "next/link";

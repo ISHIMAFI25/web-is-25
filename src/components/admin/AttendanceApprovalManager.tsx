@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Clock, User, Calendar, AlertTriangle, RefreshCw, Image } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, Calendar, AlertTriangle, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { formatJakartaDateTime } from '@/lib/timezoneUtils';
 
 interface AttendanceApproval {
@@ -238,7 +238,7 @@ export default function AttendanceApprovalManager() {
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
                     >
-                      <Image size={12} />
+                      <ImageIcon size={12} />
                       Foto
                     </a>
                   )}

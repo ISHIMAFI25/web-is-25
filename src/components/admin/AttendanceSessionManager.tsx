@@ -187,21 +187,6 @@ export default function AttendanceSessionManager() {
     return isAutoCloseTimeReached(autoCloseTime);
   };
 
-  const getAutoCloseStatus = (session: AttendanceSession) => {
-    if (!session.auto_close_time) return null;
-    
-    const now = new Date();
-    const autoCloseDate = new Date(session.auto_close_time);
-    
-    if (session.is_active && now >= autoCloseDate) {
-      return 'overdue'; // Sesi aktif tapi sudah lewat waktu tutup
-    } else if (session.is_active && now < autoCloseDate) {
-      return 'scheduled'; // Sesi aktif dengan jadwal tutup
-    } else {
-      return 'expired'; // Sesi tidak aktif
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">

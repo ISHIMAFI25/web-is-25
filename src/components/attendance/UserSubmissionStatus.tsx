@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Calendar, User as UserIcon } from "lucide-react";
+import { Clock, CheckCircle, XCircle, AlertCircle, FileText, User as UserIcon } from "lucide-react";
 import { formatJakartaDateTime } from '@/lib/timezoneUtils';
 import { extractUserFullName } from '@/lib/userUtils';
 

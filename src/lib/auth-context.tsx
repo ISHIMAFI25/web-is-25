@@ -190,6 +190,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         clearInterval(sessionCheckInterval);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Remove dependencies to avoid infinite loops
 
   const signOut = async () => {

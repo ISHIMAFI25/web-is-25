@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Upload, X, FileText, AlertCircle } from 'lucide-react';
 import { useUploadThing } from "@/lib/uploadthing";
-import { getFileIcon, getFileName, formatFileSize, validateFile } from '@/lib/uploadHelpers';
+import { getFileIcon, getFileName, validateFile } from '@/lib/uploadHelpers';
 
 interface FileUploadWidgetProps {
   files: (string | { name: string; url: string; size?: number })[];
@@ -14,12 +14,6 @@ interface FileUploadWidgetProps {
   maxSizeMB?: number;
   label?: string;
   description?: string;
-}
-
-interface UploadedFileInfo {
-  url: string;
-  name: string;
-  size: number;
 }
 
 const FileUploadWidget: React.FC<FileUploadWidgetProps> = ({
